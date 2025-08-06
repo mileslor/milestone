@@ -1,0 +1,190 @@
+/* --- Global Styles & Variables --- */
+:root {
+    --primary-dark-slate-blue: #465A69;
+    --primary-white: #FFFFFF;
+    --secondary-light-grey: #F0F2F5;
+    --secondary-charcoal: #333333;
+    --accent-bright-blue: #007BFF;
+    --font-primary: 'Roboto', 'Noto Sans TC', sans-serif;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    background-color: var(--primary-white);
+    color: var(--secondary-charcoal);
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 {
+    font-weight: 700;
+}
+
+a {
+    text-decoration: none;
+    color: var(--accent-bright-blue);
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* --- Header & Navigation Bar --- */
+.main-header {
+    background-color: var(--primary-dark-slate-blue);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-logo {
+    color: var(--primary-white);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.navbar-menu {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.navbar-menu li a {
+    color: var(--primary-white);
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+
+.navbar-menu li a:hover {
+    color: var(--accent-bright-blue);
+}
+
+
+/* --- Hero Section --- */
+.hero-section {
+    background-color: var(--primary-dark-slate-blue);
+    color: var(--primary-white);
+    text-align: center;
+    padding: 6rem 0;
+}
+
+.hero-title {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+}
+
+.btn {
+    padding: 0.8rem 1.6rem;
+    border-radius: 5px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-bright-blue);
+    color: var(--primary-white);
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* A darker shade of the accent blue */
+}
+
+
+/* --- Services Section --- */
+.services-section {
+    padding: 4rem 0;
+    background-color: var(--secondary-light-grey);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+.service-card {
+    background-color: var(--primary-white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+
+.service-icon {
+    font-size: 2.5rem;
+    color: var(--primary-dark-slate-blue);
+    margin-bottom: 1rem;
+}
+
+.service-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-dark-slate-blue);
+}
+
+
+/* --- Footer --- */
+.main-footer {
+    background-color: var(--primary-dark-slate-blue);
+    color: var(--primary-white);
+    padding-top: 3rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    padding-bottom: 2rem;
+}
+
+.footer-logo p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.footer-tagline {
+    font-size: 0.9rem;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.footer-links h4, .footer-contact h4 {
+    margin-bottom: 1rem;
+    color: var(--accent-bright-blue);
+}
+
+.footer-links ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links ul li a {
+    color: var(--primary-white);
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.footer-links ul li a:hover {
+    opacity: 1;
+}
+
+.footer-contact p {
+    margin: 0.3

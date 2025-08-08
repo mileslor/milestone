@@ -39,7 +39,7 @@ ul {
 /* --- Header & Navigation Bar --- */
 .main-header {
     background-color: var(--primary-dark-slate-blue);
-    padding: 1rem 0;
+    padding: 0.5rem 0; /* 微調 padding 令導覽列更精緻 */
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -51,11 +51,18 @@ ul {
     align-items: center;
 }
 
+/* --- 這部分已被修改 --- */
 .navbar-logo {
-    color: var(--primary-white);
-    font-size: 1.5rem;
-    font-weight: 700;
+    display: flex;
+    align-items: center;
 }
+
+.navbar-logo img {
+    height: 45px; /* 設定 Logo 的高度為 45px，你可以按需要調整 */
+    width: auto;
+}
+/* --- 修改結束 --- */
+
 
 .navbar-menu {
     display: flex;
@@ -187,4 +194,14 @@ ul {
 }
 
 .footer-contact p {
-    margin: 0.3
+    margin: 0.3rem 0;
+    opacity: 0.8;
+}
+
+.footer-bottom {
+    border-top: 1px solid #5a7285; /* Slightly lighter than the background */
+    text-align: center;
+    padding: 1rem 0;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}

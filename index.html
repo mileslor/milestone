@@ -1,86 +1,478 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant-HK">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milestone Technology - 高效、可靠的技術方案伙伴</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Milestone Technology | 高效、可靠的技術方案伙伴</title>
+  <meta name="description" content="我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans HK', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            background: 'hsl(210, 20%, 98%)',
+            foreground: 'hsl(213, 32%, 12%)',
+            card: {
+              DEFAULT: 'hsl(0, 0%, 100%)',
+              foreground: 'hsl(213, 32%, 12%)',
+            },
+            primary: {
+              DEFAULT: 'hsl(213, 80%, 18%)',
+              foreground: 'hsl(210, 20%, 98%)',
+            },
+            secondary: {
+              DEFAULT: 'hsl(210, 16%, 93%)',
+              foreground: 'hsl(213, 32%, 12%)',
+            },
+            muted: {
+              DEFAULT: 'hsl(210, 16%, 93%)',
+              foreground: 'hsl(213, 10%, 46%)',
+            },
+            accent: {
+              DEFAULT: 'hsl(211, 100%, 50%)',
+              foreground: 'hsl(0, 0%, 100%)',
+            },
+            border: 'hsl(214, 20%, 88%)',
+          },
+          borderRadius: {
+            lg: '0.625rem',
+            xl: '0.875rem',
+            '2xl': '1rem',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    *, *::before, *::after { border-color: hsl(214, 20%, 88%); }
+  </style>
 </head>
-<body>
+<body class="font-sans antialiased bg-background text-foreground">
 
-    <header class="main-header">
-        <nav class="navbar">
-            <div class="container">
-                <a href="index.html" class="navbar-logo">
-                    <img src="images/logo.png" alt="Milestone Technology Logo" style="height: 65px; width: auto;">                </a>
-                <ul class="navbar-menu">
-                    <li><a href="#services">服務項目</a></li>
-                    <li><a href="about.html">關於我們</a></li>
-                    <li><a href="contact.html">聯絡我們</a></li>
-                </ul>
+  <!-- ===== NAVBAR ===== -->
+  <header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <a href="#" class="flex items-center gap-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <span class="text-sm font-bold text-primary-foreground tracking-tight">M</span>
+        </div>
+        <span class="text-lg font-bold tracking-tight text-foreground">Milestone</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden items-center gap-8 md:flex" aria-label="Main navigation">
+        <a href="#services" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">服務</a>
+        <a href="#about" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">關於我們</a>
+        <a href="#why-us" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
+        <a href="#contact" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
+        <a href="#contact" class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
+      </nav>
+
+      <!-- Mobile Toggle -->
+      <button id="mobile-toggle" class="md:hidden text-foreground" aria-label="Open menu">
+        <svg id="icon-menu" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M3 6h18M3 18h18"/></svg>
+        <svg id="icon-close" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Mobile Nav -->
+    <nav id="mobile-nav" class="hidden border-t border-border bg-white px-6 py-4 md:hidden" aria-label="Mobile navigation">
+      <div class="flex flex-col gap-4">
+        <a href="#services" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">服務</a>
+        <a href="#about" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">關於我們</a>
+        <a href="#why-us" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
+        <a href="#contact" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
+        <a href="#contact" class="mobile-link inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===== HERO ===== -->
+    <section class="relative min-h-[90vh] flex items-center overflow-hidden">
+      <div class="absolute inset-0">
+        <img src="images/hero.jpg" alt="Modern technology workspace" class="h-full w-full object-cover" />
+        <div class="absolute inset-0 bg-primary/80"></div>
+      </div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 py-32">
+        <div class="max-w-2xl">
+          <p class="mb-4 text-sm font-medium uppercase tracking-widest text-accent">Milestone Technology</p>
+          <h1 class="mb-6 text-4xl font-bold leading-tight tracking-tight text-primary-foreground md:text-5xl lg:text-6xl" style="text-wrap:balance">高效、可靠的技術方案伙伴</h1>
+          <p class="mb-10 text-lg leading-relaxed text-primary-foreground/80 md:text-xl">我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。</p>
+          <div class="flex flex-col gap-4 sm:flex-row">
+            <a href="#services" class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-base font-medium text-accent-foreground transition-colors hover:bg-accent/90">
+              了解我們的服務
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+            <a href="#contact" class="inline-flex items-center justify-center rounded-lg border border-primary-foreground/30 bg-transparent px-6 py-3 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/10">聯絡我們</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+    <section id="services" class="py-24 bg-background">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="mb-16 max-w-2xl">
+          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">我們的服務</p>
+          <h2 class="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">全方位技術解決方案</h2>
+          <p class="text-lg leading-relaxed text-muted-foreground">從日常技術支援到客製化開發，我們的專業團隊為您的業務提供端到端的技術服務。</p>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <!-- Service 1: 技術支援 -->
+          <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+              <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z"/></svg>
             </div>
-        </nav>
-    </header>
+            <h3 class="mb-3 text-lg font-semibold text-card-foreground">技術支援</h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">快速響應的遙距及現場支援，解決您日常遇到的各種技術難題，確保業務營運不受阻礙。</p>
+          </div>
 
-    <main>
-        <section class="hero-section">
-            <div class="container hero-content">
-                <h1 class="hero-title">高效、可靠的技術方案伙伴</h1>
-                <p class="hero-subtitle">我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。</p>
-                <a href="#services" class="btn btn-primary">了解我們的服務</a>
+          <!-- Service 2: 系統管理 -->
+          <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+              <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </div>
-        </section>
+            <h3 class="mb-3 text-lg font-semibold text-card-foreground">系統管理</h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">專業的伺服器、網絡及基礎設施管理服務，保障您的 IT 系統穩定運行。</p>
+          </div>
 
-        <section id="services" class="services-section">
-            <div class="container">
-                <div class="services-grid">
-                    <div class="service-card">
-                        <div class="service-icon">[ICON]</div>
-                        <h3 class="service-title">技術支援</h3>
-                        <p class="service-description">快速響應的遙距及現場支援，解決您日常遇到的各種技術難題。</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon">[ICON]</div>
-                        <h3 class="service-title">系統管理及開發</h3>
-                        <p class="service-description">從系統維護到客製化軟件，我們為您打造穩定、自動化的營運流程。</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon">[ICON]</div>
-                        <h3 class="service-title">技術講座</h3>
-                        <p class="service-description">分享行業知識與最新技術，提升團隊的專業技能。</p>
-                    </div>
+          <!-- Service 3: 客製化軟件開發 -->
+          <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+              <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+            </div>
+            <h3 class="mb-3 text-lg font-semibold text-card-foreground">客製化軟件開發</h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">根據您的業務需求，度身訂造高效的軟件解決方案，提升營運效率。</p>
+          </div>
+
+          <!-- Service 4: 雲端方案 -->
+          <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+              <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z"/></svg>
+            </div>
+            <h3 class="mb-3 text-lg font-semibold text-card-foreground">雲端方案</h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">協助企業遷移至雲端平台，提供雲端架構設計及持續優化服務。</p>
+          </div>
+
+          <!-- Service 5: 資訊安全 -->
+          <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+              <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <h3 class="mb-3 text-lg font-semibold text-card-foreground">資訊安全</h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">全面的網絡安全評估及防護方案，保護您的企業數據資產。</p>
+          </div>
+
+          <!-- Service 6: 技術講座 -->
+          <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+              <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+            </div>
+            <h3 class="mb-3 text-lg font-semibold text-card-foreground">技術講座</h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">分享行業知識與最新技術趨勢，提升團隊的專業技能與競爭力。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section id="about" class="py-24 bg-card">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="grid items-center gap-16 lg:grid-cols-2">
+          <div class="relative aspect-[4/3] overflow-hidden rounded-2xl">
+            <img src="images/about.jpg" alt="Milestone Technology 團隊協作" class="h-full w-full object-cover" />
+          </div>
+          <div>
+            <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">關於我們</p>
+            <h2 class="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">值得信賴的技術伙伴</h2>
+            <p class="mb-6 text-base leading-relaxed text-muted-foreground">Milestone Technology 紮根香港，專注為中小企業及機構提供高品質的技術服務。我們深明企業在數碼轉型過程中面對的挑戰，因此致力以務實、高效的方式，為客戶解決各種技術難題。</p>
+            <p class="mb-10 text-base leading-relaxed text-muted-foreground">我們的團隊擁有豐富的跨行業經驗，從零售、教育到專業服務，均能提供切合實際需要的方案。我們相信，好的技術方案不僅是解決問題，更是推動業務增長的關鍵。</p>
+            <div class="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-accent md:text-3xl">10+</p>
+                <p class="mt-1 text-xs font-medium text-muted-foreground">年行業經驗</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-accent md:text-3xl">200+</p>
+                <p class="mt-1 text-xs font-medium text-muted-foreground">服務客戶</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-accent md:text-3xl">99.9%</p>
+                <p class="mt-1 text-xs font-medium text-muted-foreground">系統穩定率</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-accent md:text-3xl">24/7</p>
+                <p class="mt-1 text-xs font-medium text-muted-foreground">技術支援</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WHY US ===== -->
+    <section id="why-us" class="py-24 bg-primary">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="mb-16 max-w-2xl">
+          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">為何選擇我們</p>
+          <h2 class="mb-4 text-3xl font-bold tracking-tight text-primary-foreground md:text-4xl" style="text-wrap:balance">您的成功，就是我們的使命</h2>
+          <p class="text-lg leading-relaxed text-primary-foreground/70">我們以客戶為中心，用專業和誠意贏得信任。</p>
+        </div>
+
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <!-- Reason 1 -->
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="mb-2 text-base font-semibold text-primary-foreground">快速響應</h3>
+              <p class="text-sm leading-relaxed text-primary-foreground/70">我們承諾在收到支援請求後的最短時間內回覆，確保您的問題不會被擱置。</p>
+            </div>
+          </div>
+
+          <!-- Reason 2 -->
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="mb-2 text-base font-semibold text-primary-foreground">度身訂造</h3>
+              <p class="text-sm leading-relaxed text-primary-foreground/70">每個企業都是獨特的。我們不提供一刀切的方案，而是根據您的實際需求量身設計。</p>
+            </div>
+          </div>
+
+          <!-- Reason 3 -->
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="mb-2 text-base font-semibold text-primary-foreground">透明收費</h3>
+              <p class="text-sm leading-relaxed text-primary-foreground/70">清晰的服務範圍和收費標準，沒有隱藏費用，讓您安心預算。</p>
+            </div>
+          </div>
+
+          <!-- Reason 4 -->
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="mb-2 text-base font-semibold text-primary-foreground">持續支援</h3>
+              <p class="text-sm leading-relaxed text-primary-foreground/70">我們不只是完成項目就離開。長期的技術支援和維護，是我們服務承諾的一部分。</p>
+            </div>
+          </div>
+
+          <!-- Reason 5 -->
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="mb-2 text-base font-semibold text-primary-foreground">專業認證</h3>
+              <p class="text-sm leading-relaxed text-primary-foreground/70">團隊成員持有多項國際認可的專業認證，確保服務質素達到業界標準。</p>
+            </div>
+          </div>
+
+          <!-- Reason 6 -->
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="mb-2 text-base font-semibold text-primary-foreground">本地團隊</h3>
+              <p class="text-sm leading-relaxed text-primary-foreground/70">紮根香港的本地技術團隊，了解本地市場需求，溝通無障礙。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="py-24 bg-background">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="grid gap-16 lg:grid-cols-2">
+          <!-- Info -->
+          <div>
+            <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">聯絡我們</p>
+            <h2 class="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">讓我們開始合作</h2>
+            <p class="mb-10 text-base leading-relaxed text-muted-foreground">無論您有任何技術需求或疑問，歡迎隨時與我們聯繫。我們的團隊會盡快回覆您。</p>
+
+            <div class="flex flex-col gap-6">
+              <div class="flex items-start gap-4">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                  <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
                 </div>
+                <div>
+                  <p class="text-sm font-semibold text-foreground">電郵</p>
+                  <p class="text-sm text-muted-foreground">info@hkmilestone.com</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                  <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-foreground">電話</p>
+                  <p class="text-sm text-muted-foreground">+852 1234 5678</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                  <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-foreground">地址</p>
+                  <p class="text-sm text-muted-foreground">香港</p>
+                </div>
+              </div>
             </div>
-        </section>
-    </main>
+          </div>
 
-    <footer class="main-footer">
-        <div class="container footer-content">
-            <div class="footer-logo">
-                <p>Milestone Technology</p>
-                <p class="footer-tagline">您可靠的技術伙伴</p>
+          <!-- Form -->
+          <div class="rounded-2xl border border-border bg-card p-8 shadow-sm">
+            <form id="contact-form" class="flex flex-col gap-5">
+              <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label for="name" class="mb-1.5 block text-sm font-medium text-card-foreground">姓名</label>
+                  <input id="name" type="text" placeholder="您的姓名" required class="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
+                </div>
+                <div>
+                  <label for="company" class="mb-1.5 block text-sm font-medium text-card-foreground">公司名稱</label>
+                  <input id="company" type="text" placeholder="您的公司" class="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
+                </div>
+              </div>
+              <div>
+                <label for="email" class="mb-1.5 block text-sm font-medium text-card-foreground">電郵地址</label>
+                <input id="email" type="email" placeholder="you@company.com" required class="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
+              </div>
+              <div>
+                <label for="phone" class="mb-1.5 block text-sm font-medium text-card-foreground">聯絡電話</label>
+                <input id="phone" type="tel" placeholder="+852" class="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
+              </div>
+              <div>
+                <label for="message" class="mb-1.5 block text-sm font-medium text-card-foreground">查詢內容</label>
+                <textarea id="message" placeholder="請描述您的需求..." rows="4" required class="flex w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"></textarea>
+              </div>
+              <button type="submit" class="inline-flex w-full items-center justify-center rounded-lg bg-accent px-6 py-3 text-base font-medium text-accent-foreground transition-colors hover:bg-accent/90">提交查詢</button>
+            </form>
+
+            <!-- Success Message (hidden by default) -->
+            <div id="contact-success" class="hidden h-full items-center justify-center text-center py-16">
+              <div>
+                <div class="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
+                  <svg class="h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                </div>
+                <h3 class="mb-2 text-xl font-semibold text-card-foreground">感謝您的查詢</h3>
+                <p class="text-sm text-muted-foreground">我們已收到您的訊息，將會盡快回覆。</p>
+              </div>
             </div>
-            <div class="footer-links">
-                <h4>網站地圖</h4>
-                <ul>
-                    <li><a href="#services">服務項目</a></li>
-                    <li><a href="about.html">關於我們</a></li>
-                    <li><a href="contact.html">聯絡我們</a></li>
-                </ul>
-            </div>
-            <div class="footer-contact">
-                <h4>聯絡資訊</h4>
-                <p>電郵: sale@hkmilestone.com</p>
-                <p>電話: +852 6178 9563</p>
-            </div>
+          </div>
         </div>
-        <div class="footer-bottom">
-            <p>© 2025 hkmilestone. All Rights Reserved.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="border-t border-border bg-primary py-16">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="grid gap-12 md:grid-cols-3">
+        <!-- Brand -->
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+              <span class="text-xs font-bold text-accent-foreground">M</span>
+            </div>
+            <span class="text-base font-bold text-primary-foreground">Milestone Technology</span>
+          </div>
+          <p class="text-sm leading-relaxed text-primary-foreground/60">高效、可靠的技術方案伙伴。紮根香港，服務各行各業。</p>
         </div>
-    </footer>
+
+        <!-- Links: 服務 -->
+        <div>
+          <h3 class="mb-4 text-sm font-semibold text-primary-foreground">服務</h3>
+          <ul class="flex flex-col gap-3">
+            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">技術支援</a></li>
+            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">系統管理</a></li>
+            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">客製化開發</a></li>
+            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">雲端方案</a></li>
+          </ul>
+        </div>
+
+        <!-- Links: 公司 -->
+        <div>
+          <h3 class="mb-4 text-sm font-semibold text-primary-foreground">公司</h3>
+          <ul class="flex flex-col gap-3">
+            <li><a href="#about" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">關於我們</a></li>
+            <li><a href="#why-us" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">為何選擇我們</a></li>
+            <li><a href="#contact" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">聯絡我們</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-12 border-t border-primary-foreground/10 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <p class="text-xs text-primary-foreground/50">&copy; 2026 Milestone Technology. All rights reserved.</p>
+        <p class="text-xs text-primary-foreground/50">香港</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // Mobile nav toggle
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    const iconMenu = document.getElementById('icon-menu');
+    const iconClose = document.getElementById('icon-close');
+
+    mobileToggle.addEventListener('click', () => {
+      const isOpen = !mobileNav.classList.contains('hidden');
+      if (isOpen) {
+        mobileNav.classList.add('hidden');
+        iconMenu.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+        mobileToggle.setAttribute('aria-label', 'Open menu');
+      } else {
+        mobileNav.classList.remove('hidden');
+        iconMenu.classList.add('hidden');
+        iconClose.classList.remove('hidden');
+        mobileToggle.setAttribute('aria-label', 'Close menu');
+      }
+    });
+
+    // Close mobile nav on link click
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.add('hidden');
+        iconMenu.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+      });
+    });
+
+    // Contact form submission
+    const contactForm = document.getElementById('contact-form');
+    const contactSuccess = document.getElementById('contact-success');
+
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      contactForm.classList.add('hidden');
+      contactSuccess.classList.remove('hidden');
+      contactSuccess.classList.add('flex');
+    });
+  </script>
 
 </body>
 </html>

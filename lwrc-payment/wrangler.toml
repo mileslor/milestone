@@ -1,18 +1,12 @@
-name = "lwrc-payment-worker"
+name = "lwrc-payment"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
-
-[[r2_buckets]]
-binding = "PAYMENT_IMAGES"
-bucket_name = "lwrc-payment-images"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "lwrc-payment"
-database_id = "YOUR_D1_DATABASE_ID_HERE"
+database_id = "5e7ae082-6942-4f07-a9f1-f6efff9727bc"
 
-[vars]
-ENVIRONMENT = "production"
-
-# Secrets to set via `wrangler secret put`:
-# MINIMAX_API_KEY - MiniMax API key
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "lwrc-payment-images"

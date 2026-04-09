@@ -1,14 +1,16 @@
 /**
- * LWRC 收費記錄系統 - Cloudflare Worker
+ * LWRC 收費記錄系統 v2 - Cloudflare Worker
+ * Group Payment: 一張圖多人繳費
  * 
  * Endpoints:
- * - GET  /              - 會員上傳頁面
+ * - GET  /              - 會員上傳頁面（Group Payment）
  * - POST /api/upload    - 上傳截圖 + 資料
  * - GET  /api/members   - 會員列表
  * - GET  /api/payments  - 繳費記錄
  * - POST /api/analyze   - AI 分析圖片
  * - GET  /dashboard     - Staff Dashboard
  * - GET  /api/dashboard  - Dashboard JSON API
+ * - GET  /api/renewals  - 續會記錄
  */
 
 const HTML_UPLOAD_PAGE = `
@@ -21,66 +23,176 @@ const HTML_UPLOAD_PAGE = `
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .container { background: white; border-radius: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); padding: 40px; max-width: 500px; width: 100%; }
-    h1 { color: #1a73e8; margin-bottom: 30px; text-align: center; }
+    .container { background: white; border-radius: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); padding: 40px; max-width: 560px; width: 100%; }
+    h1 { color: #1a73e8; margin-bottom: 8px; text-align: center; }
+    .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 14px; }
     .form-group { margin-bottom: 20px; }
-    label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
-    input[type="text"], input[type="tel"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+    label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; font-size: 14px; }
+    label .hint { font-weight: 400; color: #888; font-size: 12px; }
+    input[type="text"], input[type="tel"], input[type="month"], input[type="file"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
     input[type="file"] { padding: 10px; }
-    button { width: 100%; padding: 14px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: #1557b0; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
+    .image-preview { margin-top: 15px; text-align: center; position: relative; }
+    .image-preview img { max-width: 100%; max-height: 280px; border-radius: 8px; border: 2px dashed #ddd; }
+    .image-preview .placeholder { color: #aaa; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .image-preview .placeholder span { font-size: 40px; }
+    .ocr-result { margin-top: 10px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; }
+    .ocr-result.loading { background: #fff3cd; color: #856404; display: block; }
+    .ocr-result.success { background: #d4edda; color: #155724; display: block; }
+    .ocr-result.error { background: #f8d7da; color: #721c24; display: block; }
+    .ocr-name { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 12px; }
+    .ocr-name.match { background: #c8e6c9; color: #2e7d32; }
+    .ocr-name.mismatch { background: #ffcdd2; color: #c62828; }
+    .other-member-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .other-member-row input { flex: 1; }
+    .btn-remove { background: #ff4444; color: white; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-size: 18px; line-height: 1; }
+    .btn-add { width: 100%; padding: 10px; background: #f0f0f0; color: #333; border: 1px dashed #ccc; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .btn-add:hover { background: #e8e8e8; }
+    button[type="submit"] { width: 100%; padding: 14px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button[type="submit"]:hover { background: #1557b0; }
+    button[type="submit"]:disabled { background: #ccc; cursor: not-allowed; }
     .message { margin-top: 20px; padding: 15px; border-radius: 8px; text-align: center; display: none; }
     .message.success { background: #d4edda; color: #155724; display: block; }
     .message.error { background: #f8d7da; color: #721c24; display: block; }
-    .preview { margin-top: 15px; text-align: center; }
-    .preview img { max-width: 100%; max-height: 200px; border-radius: 8px; }
+    .section-title { font-size: 13px; color: #888; margin-bottom: 10px; padding-left: 4px; border-left: 3px solid #1a73e8; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>💳 LWRC 繳費上傳</h1>
+    <p class="subtitle">一張圖多人繳費</p>
     <form id="uploadForm">
+      <!-- 繳費截圖 -->
       <div class="form-group">
-        <label for="phone">電話號碼</label>
+        <label>繳費截圖</label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+        <div class="image-preview" id="imagePreview">
+          <div class="placeholder" id="placeholder">
+            <span>📷</span>
+            <span>上傳圖片自動 OCR</span>
+          </div>
+        </div>
+        <div class="ocr-result" id="ocrResult"></div>
+      </div>
+
+      <!-- 繳費月份 -->
+      <div class="form-group">
+        <label for="month">繳費月份 <span class="hint">（要續的月份）</span></label>
+        <input type="month" id="month" name="month" required>
+      </div>
+
+      <!-- 主要付款人 -->
+      <p class="section-title">主要付款人（系統會員）</p>
+      <div class="form-group">
+        <label for="phone">電話號碼 <span class="hint">（主要付款人）</span></label>
         <input type="tel" id="phone" name="phone" placeholder="61234567" required pattern="[0-9]{8}">
       </div>
       <div class="form-group">
         <label for="name">姓名</label>
-        <input type="text" id="name" name="name" placeholder="陳大文" required>
+        <input type="text" id="name" name="name" placeholder="陳大明" required>
       </div>
-      <div class="form-group">
-        <label for="month">繳費月份</label>
-        <input type="text" id="month" name="month" placeholder="2026-04" required pattern="[0-9]{4}-[0-9]{2}">
+
+      <!-- 其他一起付款的人 -->
+      <p class="section-title">其他一起付款的人（可選）</p>
+      <div id="otherMembersContainer">
+        <div class="other-member-row" data-index="0">
+          <input type="text" name="other_name_0" placeholder="其他人的姓名" class="other-name-input">
+          <button type="button" class="btn-remove" onclick="removeOtherMember(this)" style="display:none;">×</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="image">繳費截圖</label>
-        <input type="file" id="image" name="image" accept="image/*" required>
-        <div class="preview" id="preview"></div>
-      </div>
-      <button type="submit" id="submitBtn">上傳</button>
+      <button type="button" class="btn-add" id="btnAddMember" onclick="addOtherMember()">+ 加入其他人</button>
+
+      <button type="submit" id="submitBtn" style="margin-top: 24px;">上傳</button>
       <div class="message" id="message"></div>
     </form>
   </div>
   <script>
     const form = document.getElementById('uploadForm');
-    const preview = document.getElementById('preview');
+    const preview = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('placeholder');
+    const ocrResult = document.getElementById('ocrResult');
     const message = document.getElementById('message');
     const submitBtn = document.getElementById('submitBtn');
+    let uploadedImageUrl = null;
 
-    // Set default month to current month
+    // Set default month to next month
     const now = new Date();
+    now.setMonth(now.getMonth() + 1);
     document.getElementById('month').value = now.toISOString().slice(0, 7);
 
-    // Image preview
-    document.getElementById('image').addEventListener('change', (e) => {
+    let otherMemberCount = 0;
+
+    function addOtherMember() {
+      otherMemberCount++;
+      const container = document.getElementById('otherMembersContainer');
+      const row = document.createElement('div');
+      row.className = 'other-member-row';
+      row.dataset.index = otherMemberCount;
+      row.innerHTML = \`
+        <input type="text" name="other_name_\${otherMemberCount}" placeholder="其他人的姓名" class="other-name-input">
+        <button type="button" class="btn-remove" onclick="removeOtherMember(this)">×</button>
+      \`;
+      container.appendChild(row);
+    }
+
+    function removeOtherMember(btn) {
+      btn.parentElement.remove();
+    }
+
+    // Image preview + auto OCR
+    document.getElementById('image').addEventListener('change', async (e) => {
       const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
+
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        placeholder.style.display = 'none';
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.id = 'previewImg';
+        preview.innerHTML = '';
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+
+      // Auto OCR
+      ocrResult.className = 'ocr-result loading';
+      ocrResult.textContent = '🔄 AI 識別中...';
+      ocrResult.style.display = 'block';
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const res = await fetch('/api/analyze', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          uploadedImageUrl = data.imageUrl;
+          const ai = data.aiResult;
+          let html = '✅ 識別到以下名字：';
+          if (ai.names && ai.names.length > 0) {
+            html += '<br>';
+            ai.names.forEach(n => {
+              const cls = ai.matches && ai.matches.includes(n) ? 'match' : 'mismatch';
+              html += '<span class="ocr-name ' + cls + '">' + n + '</span>';
+            });
+          }
+          if (ai.extractedText) {
+            html += '<br><small style="color:#888;">提取文字：' + ai.extractedText.substring(0, 100) + '...</small>';
+          }
+          if (ai.confidence !== undefined) {
+            html += '<br><small>置信度：' + ai.confidence + '%</small>';
+          }
+          ocrResult.innerHTML = html;
+          ocrResult.className = 'ocr-result success';
+        } else {
+          ocrResult.textContent = '⚠️ AI 識別失敗：' + (data.error || '請稍後再試');
+          ocrResult.className = 'ocr-result error';
+        }
+      } catch (err) {
+        ocrResult.textContent = '❌ 網絡錯誤';
+        ocrResult.className = 'ocr-result error';
       }
     });
 
@@ -91,21 +203,39 @@ const HTML_UPLOAD_PAGE = `
       message.className = 'message';
       message.style.display = 'none';
 
+      // Collect other members
+      const otherNames = [];
+      document.querySelectorAll('.other-name-input').forEach(input => {
+        if (input.value.trim()) otherNames.push(input.value.trim());
+      });
+
       const formData = new FormData();
       formData.append('phone', document.getElementById('phone').value);
       formData.append('name', document.getElementById('name').value);
       formData.append('month', document.getElementById('month').value);
       formData.append('image', document.getElementById('image').files[0]);
+      formData.append('other_members', JSON.stringify(otherNames));
 
       try {
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
         const data = await res.json();
-        
+
         if (res.ok) {
-          message.textContent = '✅ 上傳成功！我們會盡快確認您的繳費。';
+          let msg = '✅ 上傳成功！';
+          if (data.renewalsCreated) msg += ' 已建立 ' + data.renewalsCreated + ' 筆續會記錄。';
+          message.textContent = msg;
           message.className = 'message success';
           form.reset();
-          preview.innerHTML = '';
+          preview.innerHTML = '<div class="placeholder" id="placeholder"><span>📷</span><span>上傳圖片自動 OCR</span></div>';
+          ocrResult.style.display = 'none';
+          // Reset other members
+          document.getElementById('otherMembersContainer').innerHTML = \`
+            <div class="other-member-row" data-index="0">
+              <input type="text" name="other_name_0" placeholder="其他人的姓名" class="other-name-input">
+              <button type="button" class="btn-remove" onclick="removeOtherMember(this)" style="display:none;">×</button>
+            </div>
+          \`;
+          otherMemberCount = 0;
         } else {
           message.textContent = '❌ ' + (data.error || '上傳失敗');
           message.className = 'message error';
@@ -133,75 +263,107 @@ const HTML_DASHBOARD_PAGE = `
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f8; min-height: 100vh; }
-    .header { background: #1a73e8; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 24px; }
-    .header-right { font-size: 14px; opacity: 0.9; }
+    .header { background: #1a73e8; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .header h1 { font-size: 22px; }
+    .header-right { font-size: 13px; opacity: 0.9; }
+    .nav { background: white; border-bottom: 1px solid #e0e0e0; padding: 0 30px; display: flex; gap: 0; }
+    .nav-tab { padding: 15px 24px; border: none; background: none; cursor: pointer; font-size: 14px; font-weight: 500; color: #666; border-bottom: 3px solid transparent; transition: all 0.2s; }
+    .nav-tab:hover { color: #1a73e8; }
+    .nav-tab.active { color: #1a73e8; border-bottom-color: #1a73e8; }
     .container { padding: 30px; max-width: 1400px; margin: 0 auto; }
     .filters { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
     .filter-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; background: white; color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .filter-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     .filter-btn.active { background: #1a73e8; color: white; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
-    .stat-card .number { font-size: 36px; font-weight: 700; color: #1a73e8; }
-    .stat-card .label { color: #666; margin-top: 5px; font-size: 14px; }
-    .stat-card.paid .number { color: #34a853; }
-    .stat-card.unpaid .number { color: #ea4335; }
-    .stat-card.flagged .number { color: #fbbc04; }
-    .members-table { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f8f9fa; padding: 15px 20px; text-align: left; font-weight: 600; color: #333; font-size: 14px; border-bottom: 2px solid #e9ecef; }
-    td { padding: 15px 20px; border-bottom: 1px solid #e9ecef; font-size: 14px; }
-    tr:hover { background: #f8f9fa; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+    .stat-card .number { font-size: 32px; font-weight: 700; color: #1a73e8; }
+    .stat-card .label { color: #666; margin-top: 4px; font-size: 13px; }
+    .stat-card.confirmed .number { color: #34a853; }
+    .stat-card.pending .number { color: #fbbc04; }
+    .stat-card.flagged .number { color: #ea4335; }
+    .month-section { margin-bottom: 40px; }
+    .month-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; display: flex; align-items: center; gap: 10px; }
+    .month-title .badge { background: #1a73e8; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .payment-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 16px; }
+    .payment-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+    .payment-header .left { display: flex; flex-direction: column; gap: 4px; }
+    .payment-header .month { font-weight: 600; font-size: 15px; color: #333; }
+    .payment-header .date { font-size: 12px; color: #888; }
+    .payment-header .right { display: flex; align-items: center; gap: 10px; }
     .status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .status.paid { background: #d4edda; color: #155724; }
-    .status.unpaid { background: #f8d7da; color: #721c24; }
+    .status.confirmed { background: #d4edda; color: #155724; }
     .status.pending { background: #fff3cd; color: #856404; }
     .status.flagged { background: #ffeeba; color: #856404; }
-    .phone-link { color: #1a73e8; text-decoration: none; font-weight: 500; }
-    .phone-link:hover { text-decoration: underline; }
-    .btn-view { padding: 6px 12px; background: #e9ecef; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .btn-view:hover { background: #dee2e6; }
+    .members-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 13px; background: #e9ecef; color: #333; }
+    .member-chip.main { background: #e3f2fd; color: #1565c0; font-weight: 500; }
+    .member-chip .phone { font-size: 11px; color: #888; }
+    .payment-image { margin-top: 12px; }
+    .payment-image img { max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #e0e0e0; cursor: pointer; transition: transform 0.2s; }
+    .payment-image img:hover { transform: scale(1.05); }
+    .ai-info { margin-top: 10px; font-size: 13px; color: #666; }
+    .ai-info .confidence { color: #2e7d32; font-weight: 600; }
+    .renewals-list { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+    .renewal-item { padding: 14px 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .renewal-item:last-child { border-bottom: none; }
+    .renewal-item .info { display: flex; flex-direction: column; gap: 2px; }
+    .renewal-item .name { font-weight: 500; color: #333; }
+    .renewal-item .phone { font-size: 12px; color: #888; }
+    .renewal-item .month-tag { background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
     .empty { text-align: center; padding: 60px; color: #666; }
     .loading { text-align: center; padding: 40px; color: #666; }
-    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
     .modal.show { display: flex; }
-    .modal-content { background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow: auto; }
+    .modal-content { background: white; border-radius: 12px; max-width: 800px; width: 95%; max-height: 90vh; overflow: auto; }
     .modal-header { padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; }
     .modal-header h2 { font-size: 18px; }
-    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+    .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #666; }
     .modal-body { padding: 20px; }
     .modal-image { width: 100%; border-radius: 8px; margin-bottom: 15px; }
-    .ai-result { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+    .ai-result { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.7; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-action { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .btn-confirm { background: #34a853; color: white; }
+    .btn-flag { background: #ea4335; color: white; }
+    .btn-reset { background: #fbbc04; color: #333; }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>📊 LWRC Staff Dashboard</h1>
-    <div class="header-right">收費記錄系統</div>
+    <div class="header-right">Group Payment · 續會管理</div>
+  </div>
+  <div class="nav">
+    <button class="nav-tab active" data-tab="payments" onclick="switchTab('payments')">💰 繳費記錄</button>
+    <button class="nav-tab" data-tab="renewals" onclick="switchTab('renewals')">📅 待續會員</button>
   </div>
   <div class="container">
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">全部</button>
-      <button class="filter-btn" data-filter="paid">已繳</button>
-      <button class="filter-btn" data-filter="unpaid">未繳</button>
-      <button class="filter-btn" data-filter="pending">待確認</button>
-      <button class="filter-btn" data-filter="flagged">有問題</button>
+    <!-- Payments Tab -->
+    <div class="tab-content active" id="tab-payments">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="confirmed">已確認</button>
+        <button class="filter-btn" data-filter="pending">待確認</button>
+        <button class="filter-btn" data-filter="flagged">有問題</button>
+      </div>
+      <div class="stats">
+        <div class="stat-card"><div class="number" id="totalPayments">-</div><div class="label">總記錄</div></div>
+        <div class="stat-card confirmed"><div class="number" id="confirmedCount">-</div><div class="label">已確認</div></div>
+        <div class="stat-card pending"><div class="number" id="pendingCount">-</div><div class="label">待確認</div></div>
+        <div class="stat-card flagged"><div class="number" id="flaggedCount">-</div><div class="label">有問題</div></div>
+      </div>
+      <div id="paymentsList"><div class="loading">載入中...</div></div>
     </div>
-    <div class="stats">
-      <div class="stat-card"><div class="number" id="totalCount">-</div><div class="label">總會員</div></div>
-      <div class="stat-card paid"><div class="number" id="paidCount">-</div><div class="label">已繳</div></div>
-      <div class="stat-card unpaid"><div class="number" id="unpaidCount">-</div><div class="label">未繳</div></div>
-      <div class="stat-card flagged"><div class="number" id="flaggedCount">-</div><div class="label">有問題</div></div>
-    </div>
-    <div class="members-table">
-      <div id="loading" class="loading">載入中...</div>
-      <table id="membersTable" style="display:none;">
-        <thead><tr><th>電話</th><th>姓名</th><th>當月狀態</th><th>操作</th></tr></thead>
-        <tbody id="membersBody"></tbody>
-      </table>
+
+    <!-- Renewals Tab -->
+    <div class="tab-content" id="tab-renewals">
+      <div id="renewalsList"><div class="loading">載入中...</div></div>
     </div>
   </div>
+
   <div class="modal" id="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -211,76 +373,167 @@ const HTML_DASHBOARD_PAGE = `
       <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
+
   <script>
-    let allData = [];
+    let allPayments = [];
+    let allRenewals = [];
     let currentFilter = 'all';
 
     async function loadData() {
       try {
         const res = await fetch('/api/dashboard');
         const data = await res.json();
-        allData = data.members;
+        allPayments = data.payments || [];
+        allRenewals = data.renewals || [];
         updateStats(data.stats);
-        renderTable();
+        renderPayments();
+        renderRenewals();
       } catch (err) {
-        document.getElementById('loading').textContent = '載入失敗';
+        document.getElementById('paymentsList').innerHTML = '<div class="empty">載入失敗</div>';
       }
     }
 
     function updateStats(stats) {
-      document.getElementById('totalCount').textContent = stats.total;
-      document.getElementById('paidCount').textContent = stats.paid;
-      document.getElementById('unpaidCount').textContent = stats.unpaid;
+      document.getElementById('totalPayments').textContent = stats.total;
+      document.getElementById('confirmedCount').textContent = stats.confirmed;
+      document.getElementById('pendingCount').textContent = stats.pending;
       document.getElementById('flaggedCount').textContent = stats.flagged;
     }
 
-    function renderTable() {
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      const filtered = currentFilter === 'all' ? allData : allData.filter(m => {
-        const status = m.currentMonthStatus || 'unpaid';
-        return status === currentFilter;
-      });
+    function renderPayments() {
+      const filtered = currentFilter === 'all' 
+        ? allPayments 
+        : allPayments.filter(p => p.status === currentFilter);
 
-      const tbody = document.getElementById('membersBody');
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('membersTable').style.display = 'table';
-
+      const container = document.getElementById('paymentsList');
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">沒有資料</td></tr>';
+        container.innerHTML = '<div class="empty">沒有資料</div>';
         return;
       }
 
-      tbody.innerHTML = filtered.map(m => {
-        const status = m.currentMonthStatus || 'unpaid';
-        const statusLabels = { paid: '✅ 已繳', unpaid: '❌ 未繳', pending: '⏳ 待確認', flagged: '⚠️ 有問題' };
-        const phone = m.phone.startsWith('852') ? m.phone : '852' + m.phone;
-        return '<tr>' +
-          '<td><a class="phone-link" href="https://wa.me/' + phone + '" target="_blank">' + m.phone + '</a></td>' +
-          '<td>' + m.name + '</td>' +
-          '<td><span class="status ' + status + '">' + statusLabels[status] + '</span></td>' +
-          '<td><button class="btn-view" onclick="viewDetails(\\'' + m.id + '\\')">詳情</button></td>' +
-        '</tr>';
+      // Group by month
+      const byMonth = {};
+      filtered.forEach(p => {
+        if (!byMonth[p.month]) byMonth[p.month] = [];
+        byMonth[p.month].push(p);
+      });
+
+      const months = Object.keys(byMonth).sort().reverse();
+      container.innerHTML = months.map(month => {
+        const payments = byMonth[month];
+        return '<div class="month-section">' +
+          '<div class="month-title">' + month + ' <span class="badge">' + payments.length + ' 筆</span></div>' +
+          payments.map(p => renderPaymentCard(p)).join('') +
+        '</div>';
       }).join('');
     }
 
-    function viewDetails(memberId) {
-      const member = allData.find(m => m.id === memberId);
-      if (!member) return;
-      const phone = member.phone.startsWith('852') ? member.phone : '852' + member.phone;
-      const modalBody = document.getElementById('modalBody');
-      let html = '<p><strong>姓名:</strong> ' + member.name + '</p>';
-      html += '<p><strong>電話:</strong> <a href="https://wa.me/' + phone + '" target="_blank">' + member.phone + '</a></p>';
-      html += '<p><strong>當月狀態:</strong> ' + (member.currentMonthStatus || 'unpaid') + '</p>';
-      if (member.latestPayment) {
-        const p = member.latestPayment;
-        if (p.image_url) html += '<img class="modal-image" src="' + p.image_url + '" alt="截圖">';
-        if (p.ai_result) {
-          const ai = JSON.parse(p.ai_result);
-          html += '<div class="ai-result"><strong>AI 分析結果:</strong><br>';
-          html += '比對會員: ' + (ai.matchedMember || '無') + '<br>';
-          html += '置信度: ' + (ai.confidence || 0) + '%<br>';
-          html += '提取文字: ' + (ai.extractedText || '無') + '</div>';
+    function renderPaymentCard(p) {
+      const statusLabels = { confirmed: '✅ 已確認', pending: '⏳ 待確認', flagged: '⚠️ 有問題' };
+      const statusClass = p.status;
+      const date = new Date(p.uploaded_at).toLocaleDateString('zh-HK');
+
+      let membersHtml = '';
+      if (p.mainMember) {
+        membersHtml += '<span class="member-chip main">' + p.mainMember.name + ' <span class="phone">' + p.mainMember.phone + '</span></span>';
+      }
+      if (p.other_members && p.other_members.length > 0) {
+        p.other_members.forEach(n => {
+          membersHtml += '<span class="member-chip">' + n + '</span>';
+        });
+      }
+
+      let aiHtml = '';
+      if (p.ai_result) {
+        const ai = typeof p.ai_result === 'string' ? JSON.parse(p.ai_result) : p.ai_result;
+        if (ai.confidence !== undefined) {
+          aiHtml += '<div class="ai-info">置信度: <span class="confidence">' + ai.confidence + '%</span></div>';
         }
+      }
+
+      return '<div class="payment-card">' +
+        '<div class="payment-header">' +
+          '<div class="left">' +
+            '<div class="month">📅 ' + p.month + '</div>' +
+            '<div class="date">上傳: ' + date + '</div>' +
+          '</div>' +
+          '<div class="right">' +
+            '<span class="status ' + statusClass + '">' + statusLabels[statusClass] + '</span>' +
+            '<div class="actions">' +
+              '<button class="btn-action btn-confirm" onclick="updateStatus(' + p.id + ', \'confirmed\')">✅ 確認</button>' +
+              '<button class="btn-action btn-flag" onclick="updateStatus(' + p.id + ', \'flagged\')">⚠️ 標記</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="members-row">' + membersHtml + '</div>' +
+        (p.image_url ? '<div class="payment-image"><img src="' + p.image_url + '" onclick="openModal(' + p.id + ')" alt="截圖"></div>' : '') +
+        aiHtml +
+      '</div>';
+    }
+
+    function renderRenewals() {
+      const container = document.getElementById('renewalsList');
+      if (allRenewals.length === 0) {
+        container.innerHTML = '<div class="empty">沒有待續會員 🎉</div>';
+        return;
+      }
+
+      // Group by month
+      const byMonth = {};
+      allRenewals.forEach(r => {
+        if (!byMonth[r.month]) byMonth[r.month] = [];
+        byMonth[r.month].push(r);
+      });
+
+      const months = Object.keys(byMonth).sort();
+      container.innerHTML = months.map(month => {
+        const renewals = byMonth[month];
+        return '<div class="month-section">' +
+          '<div class="month-title">' + month + ' <span class="badge">' + renewals.length + ' 人待續</span></div>' +
+          '<div class="renewals-list">' +
+          renewals.map(r => {
+            const phone = r.member.phone.startsWith('852') ? r.member.phone : '852' + r.member.phone;
+            return '<div class="renewal-item">' +
+              '<div class="info">' +
+                '<div class="name">' + r.member.name + '</div>' +
+                '<div class="phone"><a href="https://wa.me/' + phone + '" target="_blank" style="color:#1a73e8;text-decoration:none;">' + r.member.phone + '</a></div>' +
+              '</div>' +
+              '<span class="month-tag">' + month + '</span>' +
+            '</div>';
+          }).join('') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        const res = await fetch('/api/payments/' + id + '/status', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          const p = allPayments.find(x => x.id === id);
+          if (p) p.status = status;
+          renderPayments();
+        }
+      } catch (err) {
+        alert('更新失敗');
+      }
+    }
+
+    function openModal(paymentId) {
+      const p = allPayments.find(x => x.id === paymentId);
+      if (!p) return;
+      let html = '';
+      if (p.image_url) html += '<img class="modal-image" src="' + p.image_url + '" alt="截圖">';
+      if (p.ai_result) {
+        const ai = typeof p.ai_result === 'string' ? JSON.parse(p.ai_result) : p.ai_result;
+        html += '<div class="ai-result"><strong>AI 分析結果:</strong><br>';
+        if (ai.names && ai.names.length > 0) html += '識別到名字: ' + ai.names.join(', ') + '<br>';
+        if (ai.confidence !== undefined) html += '置信度: ' + ai.confidence + '%<br>';
+        if (ai.extractedText) html += '提取文字: ' + ai.extractedText + '</div>';
       }
       document.getElementById('modalBody').innerHTML = html;
       document.getElementById('modal').classList.add('show');
@@ -290,12 +543,19 @@ const HTML_DASHBOARD_PAGE = `
       document.getElementById('modal').classList.remove('show');
     }
 
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelector('.nav-tab[data-tab="' + tab + '"]').classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFilter = btn.dataset.filter;
-        renderTable();
+        renderPayments();
       });
     });
 
@@ -314,10 +574,9 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
@@ -326,7 +585,6 @@ export default {
     }
 
     try {
-      // Routes
       if (path === '/' || path === '/payment') {
         return new Response(HTML_UPLOAD_PAGE, { headers: { 'Content-Type': 'text/html' } });
       }
@@ -345,7 +603,7 @@ export default {
         return await handleDashboard(request, env);
       }
 
-      // API: Analyze (for manual trigger)
+      // API: Analyze (auto OCR)
       if (path === '/api/analyze' && request.method === 'POST') {
         return await handleAnalyze(request, env);
       }
@@ -353,6 +611,17 @@ export default {
       // API: Members list
       if (path === '/api/members' && request.method === 'GET') {
         return await handleGetMembers(request, env);
+      }
+
+      // API: Renewals
+      if (path === '/api/renewals' && request.method === 'GET') {
+        return await handleGetRenewals(request, env);
+      }
+
+      // API: Update payment status
+      if (path.match(/^\/api\/payments\/(\d+)\/status$/) && request.method === 'PATCH') {
+        const id = parseInt(path.match(/^\/api\/payments\/(\d+)\/status$/)[1]);
+        return await handleUpdatePaymentStatus(request, env, id);
       }
 
       // API: Health check
@@ -364,13 +633,21 @@ export default {
 
       return new Response('Not Found', { status: 404 });
     } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), {
+      return new Response(JSON.stringify({ error: err.message, stack: err.stack }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
   }
 };
+
+// Generate member ID like LWR001, LWR002...
+async function generateMemberId(env) {
+  const members = await env.DB.prepare('SELECT id FROM members ORDER BY id DESC LIMIT 1').first();
+  if (!members) return 'LWR001';
+  const num = parseInt(members.id.replace('LWR', '')) + 1;
+  return 'LWR' + String(num).padStart(3, '0');
+}
 
 // Handle file upload
 async function handleUpload(request, env) {
@@ -379,6 +656,8 @@ async function handleUpload(request, env) {
   const name = formData.get('name');
   const month = formData.get('month');
   const image = formData.get('image');
+  const otherMembersRaw = formData.get('other_members');
+  const other_members = otherMembersRaw ? JSON.parse(otherMembersRaw) : [];
 
   if (!phone || !name || !month || !image) {
     return new Response(JSON.stringify({ error: '缺少必要資料' }), {
@@ -387,167 +666,262 @@ async function handleUpload(request, env) {
     });
   }
 
-  // Generate unique ID
-  const memberId = 'm_' + Date.now();
-  const imageKey = `${month}/${memberId}_${image.name}`;
-
-  // Upload to R2
-  await env.PAYMENT_IMAGES.put(imageKey, image);
-
-  // Get public URL
-  const imageUrl = `https://lwrc-payment-images.<ACCOUNT>.r2.dev/${imageKey}`;
-
-  // Insert into D1
-  // First check if member exists
+  // Find or create main member
   let member = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
-  
   if (!member) {
-    // Create new member
+    const memberId = await generateMemberId(env);
     await env.DB.prepare('INSERT INTO members (id, name, phone) VALUES (?, ?, ?)').bind(memberId, name, phone).run();
     member = { id: memberId, name, phone };
   }
 
-  // Insert payment record
-  await env.DB.prepare(`
-    INSERT INTO payments (member_id, month, image_url, status)
-    VALUES (?, ?, ?, 'pending')
-  `).bind(member.id, month, imageUrl).run();
+  // Upload image to R2
+  const imageKey = `${month}/${member.id}_${Date.now()}_${image.name}`;
+  await env.PAYMENT_IMAGES.put(imageKey, image);
 
-  // Trigger AI analysis
-  await analyzeImage(member.id, imageUrl, env);
+  const imageUrl = imageKey; // Use key, not full URL
+
+  // Perform AI analysis first to get results
+  const aiResult = await analyzeImageGetResult(image, env);
+  
+  // Determine status based on confidence
+  let status = 'pending';
+  if (aiResult && aiResult.confidence >= 80) status = 'confirmed';
+  if (aiResult && aiResult.confidence < 50) status = 'flagged';
+
+  // Insert payment record
+  const result = await env.DB.prepare(`
+    INSERT INTO payments (month, amount, image_url, ai_result, status, paid_by_member_id, other_members, uploaded_at)
+    VALUES (?, 0, ?, ?, ?, ?, ?, datetime('now'))
+  `).bind(month, imageUrl, JSON.stringify(aiResult || {}), status, member.id, JSON.stringify(other_members)).run();
+
+  // Create renewal records for main member and other members
+  const allNames = [name, ...other_members];
+  const renewalsCreated = [];
+
+  for (const n of allNames) {
+    // Try to find member by name (case-insensitive)
+    let m = await env.DB.prepare('SELECT * FROM members WHERE LOWER(name) = LOWER(?)').bind(n).first();
+    
+    if (!m && n === name) {
+      // Main payer not found by phone (rare), use the member we just created
+      m = member;
+    }
+
+    if (m) {
+      // Check if renewal already exists for this member+month
+      const existing = await env.DB.prepare(
+        'SELECT * FROM renewals WHERE member_id = ? AND month = ?'
+      ).bind(m.id, month).first();
+
+      if (!existing) {
+        await env.DB.prepare(`
+          INSERT INTO renewals (member_id, month, status, paid_at)
+          VALUES (?, ?, 'paid', datetime('now'))
+        `).bind(m.id, month).run();
+        renewalsCreated.push(m.name);
+      }
+    }
+  }
 
   return new Response(JSON.stringify({
     success: true,
     member: { id: member.id, name: member.name, phone: member.phone },
-    imageUrl
+    imageUrl: imageUrl,
+    status,
+    aiResult,
+    renewalsCreated: renewalsCreated.length
   }), {
     headers: { 'Content-Type': 'application/json' }
   });
 }
 
-// Analyze image with MiniMax Vision
-async function analyzeImage(memberId, imageUrl, env) {
+// Analyze image and return result (without storing)
+async function analyzeImageGetResult(imageFile, env) {
   if (!env.MINIMAX_API_KEY) {
-    console.log('MiniMax API key not configured');
-    return;
+    return { error: 'MiniMax API key not configured', confidence: 0 };
   }
 
   try {
-    // Fetch image from R2
-    const imageObject = await env.PAYMENT_IMAGES.get(imageUrl.split('/').pop());
-    if (!imageObject) return;
-
-    const imageBuffer = await imageObject.arrayBuffer();
+    const imageBuffer = await imageFile.arrayBuffer();
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
 
+    // Get all member names for matching
+    const members = await env.DB.prepare('SELECT name FROM members').all();
+    const memberNames = members.results?.map(m => m.name) || [];
+
     // Call MiniMax Vision API
-    const response = await fetch('https://api.minimaxi.com/v1/images/describe', {
+    const response = await fetch('https://api.minimax.com/v1/images/describe', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${env.MINIMAX_API_KEY}`,
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'image-01',
-        image_url: imageUrl,
-        prompt: '請識別這張繳費截圖中的文字內容，包括：姓名、日期、金額，並以JSON格式回傳。'
-      })
-    });
-
-    if (!response.ok) {
-      console.error('MiniMax API error:', await response.text());
-      return;
-    }
-
-    const result = await response.json();
-    
-    // Extract and parse AI result
-    const extractedText = result.data?.description || '';
-    
-    // Match against member data
-    const member = await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(memberId).first();
-    let confidence = 0;
-    let matchedName = null;
-
-    if (member && extractedText) {
-      // Simple name matching
-      if (extractedText.includes(member.name)) {
-        confidence = 90;
-        matchedName = member.name;
       }
-    }
-
-    // Update payment with AI result
-    const aiResult = JSON.stringify({
-      extractedText,
-      matchedMember: matchedName,
-      confidence,
-      rawResponse: result
     });
 
-    // Determine status based on confidence
-    let status = 'pending';
-    if (confidence >= 80) status = 'confirmed';
-    if (confidence < 50) status = 'flagged';
+    // If minimax.com fails, try minimaxi.com
+    let result;
+    if (!response.ok) {
+      // Try alternative endpoint
+      const altResponse = await fetch('https://api.minimaxi.com/v1/images/describe', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.MINIMAX_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'image-01',
+          image_base64: base64Image,
+          prompt: '請識別這張繳費截圖中的所有文字內容，包括姓名、日期、金額。以JSON格式回傳：{names: ["姓名1", "姓名2"], amounts: [數字], extractedText: "完整文字"}'
+        })
+      });
+      if (!altResponse.ok) {
+        console.error('MiniMax API error:', await altResponse.text());
+        return { confidence: 0, names: [], matches: [] };
+      }
+      result = await altResponse.json();
+    } else {
+      result = await response.json();
+    }
 
-    // Update the latest payment for this member
-    await env.DB.prepare(`
-      UPDATE payments 
-      SET ai_result = ?, status = ?
-      WHERE member_id = ? AND status = 'pending'
-      ORDER BY uploaded_at DESC LIMIT 1
-    `).bind(aiResult, status, memberId).run();
+    const extractedText = result.data?.description || result.data?.text || '';
+    
+    // Extract names from AI response
+    let names = [];
+    try {
+      const parsed = JSON.parse(extractedText);
+      if (parsed.names) names = parsed.names;
+      else if (Array.isArray(parsed)) names = parsed;
+    } catch {
+      // Try to extract Chinese names from text
+      const chineseNameRegex = /[\u4e00-\u9fa5]{2,4}/g;
+      names = extractedText.match(chineseNameRegex) || [];
+      // Deduplicate and filter
+      names = [...new Set(names)];
+    }
 
+    // Match names against member list
+    const matches = [];
+    names.forEach(n => {
+      const matched = memberNames.find(mn => mn.includes(n) || n.includes(mn));
+      if (matched) matches.push(n);
+    });
+
+    const confidence = matches.length > 0 
+      ? Math.min(95, 50 + matches.length * 15)
+      : 0;
+
+    return {
+      extractedText,
+      names,
+      matches,
+      confidence,
+      raw: result.data || {}
+    };
   } catch (err) {
     console.error('AI analysis error:', err);
+    return { confidence: 0, names: [], matches: [], error: err.message };
   }
 }
 
-// Handle manual analyze request
+// Handle analyze request
 async function handleAnalyze(request, env) {
-  const { memberId, imageUrl } = await request.json();
-  await analyzeImage(memberId, imageUrl, env);
-  return new Response(JSON.stringify({ success: true }), {
+  const formData = await request.formData();
+  const image = formData.get('image');
+
+  if (!image) {
+    return new Response(JSON.stringify({ error: 'No image provided' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Upload image temporarily
+  const imageKey = `temp/${Date.now()}_${image.name}`;
+  await env.PAYMENT_IMAGES.put(imageKey, image);
+
+  const aiResult = await analyzeImageGetResult(image, env);
+
+  return new Response(JSON.stringify({
+    success: true,
+    imageUrl: imageKey,
+    aiResult
+  }), {
     headers: { 'Content-Type': 'application/json' }
   });
 }
 
 // Dashboard data
 async function handleDashboard(request, env) {
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  // Get all payments with member info
+  const payments = await env.DB.prepare(`
+    SELECT p.*, m.name as main_member_name, m.phone as main_member_phone
+    FROM payments p
+    LEFT JOIN members m ON p.paid_by_member_id = m.id
+    ORDER BY p.uploaded_at DESC
+    LIMIT 100
+  `).all();
 
-  // Get all members with their current month payment status
-  const members = await env.DB.prepare(`
-    SELECT m.*, 
-      (SELECT status FROM payments WHERE member_id = m.id AND month = ? ORDER BY uploaded_at DESC LIMIT 1) as currentMonthStatus,
-      (SELECT ai_result FROM payments WHERE member_id = m.id ORDER BY uploaded_at DESC LIMIT 1) as latestAiResult
-    FROM members m
-    ORDER BY m.created_at DESC
-  `).bind(currentMonth).all();
+  // Get pending renewals (members who haven't paid for current or next month)
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0, 7);
 
-  // Get all members
-  const allMembers = await env.DB.prepare('SELECT * FROM members').all();
+  const pendingRenewals = await env.DB.prepare(`
+    SELECT r.*, m.name, m.phone
+    FROM renewals r
+    JOIN members m ON r.member_id = m.id
+    WHERE r.status = 'pending'
+    AND (r.month = ? OR r.month = ?)
+    ORDER BY r.month ASC
+  `).bind(currentMonth, nextMonth).all();
+
+  // Also get all members who don't have a renewal record for next month
+  const allMembers = await env.DB.prepare('SELECT * FROM members ORDER BY created_at DESC').all();
+  const membersWithRenewal = await env.DB.prepare(
+    'SELECT DISTINCT member_id FROM renewals WHERE month = ?'
+  ).bind(nextMonth).all();
+  const renewedMemberIds = new Set(membersWithRenewal.results?.map(r => r.member_id) || []);
+
+  const missingRenewals = allMembers.results?.filter(m => !renewedMemberIds.has(m.id)).map(m => ({
+    member_id: m.id,
+    month: nextMonth,
+    status: 'pending',
+    member: { id: m.id, name: m.name, phone: m.phone }
+  })) || [];
 
   // Calculate stats
-  let paid = 0, unpaid = allMembers.results?.length || 0, flagged = 0, pending = 0;
-
-  members.results?.forEach(m => {
-    if (m.currentMonthStatus === 'confirmed') { paid++; unpaid--; }
-    else if (m.currentMonthStatus === 'flagged') flagged++;
-    else if (m.currentMonthStatus === 'pending') pending++;
+  let confirmed = 0, pending = 0, flagged = 0;
+  payments.results?.forEach(p => {
+    if (p.status === 'confirmed') confirmed++;
+    else if (p.status === 'pending') pending++;
+    else if (p.status === 'flagged') flagged++;
   });
 
-  // Get latest payment for each member
-  const membersWithPayments = await Promise.all(members.results?.map(async (m) => {
-    const latestPayment = await env.DB.prepare(`
-      SELECT * FROM payments WHERE member_id = ? ORDER BY uploaded_at DESC LIMIT 1
-    `).bind(m.id).first();
-    return { ...m, latestPayment };
-  }) || []);
+  // Enrich payments with member data
+  const enrichedPayments = (payments.results || []).map(p => {
+    let mainMember = null;
+    if (p.main_member_name) {
+      mainMember = { name: p.main_member_name, phone: p.main_member_phone };
+    }
+    let other_members = [];
+    try {
+      other_members = JSON.parse(p.other_members || '[]');
+    } catch {}
+    return { ...p, mainMember, other_members };
+  });
 
   return new Response(JSON.stringify({
-    members: membersWithPayments,
-    stats: { total: allMembers.results?.length || 0, paid, unpaid, flagged, pending }
+    payments: enrichedPayments,
+    renewals: [...(pendingRenewals.results || []).map(r => ({
+      ...r,
+      member: { id: r.member_id, name: r.name, phone: r.phone }
+    })), ...missingRenewals],
+    stats: {
+      total: payments.results?.length || 0,
+      confirmed,
+      pending,
+      flagged
+    }
   }), {
     headers: { 'Content-Type': 'application/json' }
   });
@@ -557,6 +931,35 @@ async function handleDashboard(request, env) {
 async function handleGetMembers(request, env) {
   const members = await env.DB.prepare('SELECT * FROM members ORDER BY created_at DESC').all();
   return new Response(JSON.stringify({ members: members.results }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+// Get renewals
+async function handleGetRenewals(request, env) {
+  const renewals = await env.DB.prepare(`
+    SELECT r.*, m.name, m.phone
+    FROM renewals r
+    JOIN members m ON r.member_id = m.id
+    ORDER BY r.month ASC
+  `).all();
+  return new Response(JSON.stringify({ renewals: renewals.results }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+// Update payment status
+async function handleUpdatePaymentStatus(request, env, id) {
+  const { status } = await request.json();
+  if (!['pending', 'confirmed', 'flagged'].includes(status)) {
+    return new Response(JSON.stringify({ error: 'Invalid status' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  await env.DB.prepare('UPDATE payments SET status = ? WHERE id = ?').bind(status, id).run();
+  return new Response(JSON.stringify({ success: true }), {
     headers: { 'Content-Type': 'application/json' }
   });
 }

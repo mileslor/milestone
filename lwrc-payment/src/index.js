@@ -465,32 +465,29 @@ async function handleApi(req, env, url) {
     const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
 
     try {
-      const resp = await fetch("https://api.minimaxi.com/v1/vision", {
+      // Use OCR.space free OCR API
+      const formDataOCR = new FormData();
+      formDataOCR.append("base64Image", "data:image/jpeg;base64," + base64);
+      formDataOCR.append("language", "eng");
+      formDataOCR.append("isOverlayRequired", "false");
+      formDataOCR.append("detectOrientation", "true");
+      formDataOCR.append("scale", "true");
+      formDataOCR.append("OCREngine", "2");
+
+      const resp = await fetch("https://api.ocr.space/parse/image", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${env.MINIMAX_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "minimax/vision",
-          messages: [{
-            role: "user",
-            content: [
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
-              { type: "text", text: "請識別這張銀行轉帳截圖，提取：1)付款人姓名 2)銀行名稱 3)轉帳金額（純數字）4)轉帳日期。以JSON回覆：{\"name\":\"\",\"bank\":\"\",\"amount\":\"\",\"date\":\"\"}。找不到的用null。" }
-            ]
-          }]
-        })
+        headers: { "apikey": "helloworld" },
+        body: formDataOCR
       });
 
       const data = await resp.json();
-      const content = data.choices?.[0]?.message?.content || "";
-      let parsed = null;
-      try {
-        const m = content.match(/\{[\s\S]*?\}/);
-        if (m) parsed = JSON.parse(m[0]);
-      } catch (_) {}
-      return json({ success: true, data: parsed || { raw: content.slice(0, 200) } });
+      const text = data?.ParsedResults?.[0]?.ParsedText || "";
+      // Extract amount (HK$) and name from text
+      const amountMatch = text.match(/HK\$\s*([0-9,]+)|([0-9,]+)\s*HK/);
+      const amount = amountMatch ? (amountMatch[1] || amountMatch[2]).replace(/,/g, "") : null;
+      const nameMatch = text.match(/[A-Za-z\u4e00-\u9fff]{2,10}/);
+      const name = nameMatch ? nameMatch[0] : null;
+      return json({ success: true, data: { name, amount, bank: "OCR", raw: text.slice(0, 200) } });
     } catch (err) {
       return json({ success: false, error: err.message });
     }

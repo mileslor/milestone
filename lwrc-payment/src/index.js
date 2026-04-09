@@ -282,17 +282,22 @@ window.updatePerson = function(i, field, val) {
   console.log('[updatePerson]', i, field, val);
   if (persons[i]) persons[i][field] = val;
 };
-
-// ── Month management ───────────────────────────────────────────
 window.renderMonths = function() {
   console.log('[renderMonths] months:', Object.keys(MONTHS_PRICE).length);
   const grid = document.getElementById('monthsGrid');
-  const html = Object.entries(MONTHS_PRICE).map(([id, info]) => {
-    return '<div class="month-chip" data-month="' + id + '" onclick="window.toggleMonth(\'' + id + '\')">' + info.name + ' $' + info.price + '</div>';
+  const html = Object.entries(MONTHS_PRICE).map(function(entry) {
+    var id = entry[0];
+    var info = entry[1];
+    return '<div class="month-chip" data-id="' + id + '">' + info.name + ' $' + info.price + '</div>';
   }).join('');
   grid.innerHTML = html;
+  grid.onclick = function(e) {
+    var chip = e.target.closest('.month-chip');
+    if (chip) window.toggleMonth(chip.dataset.id);
+  };
   console.log('[renderMonths] rendered', grid.children.length, 'chips');
 };
+
 
 window.toggleMonth = function(monthId) {
   console.log('[toggleMonth]', monthId, 'selected:', selectedMonths.has(monthId));

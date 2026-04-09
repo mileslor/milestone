@@ -430,7 +430,7 @@ export default {
           mp[m.id] = { name: m.name, price: m.price };
         }
         const html = PAGE_UPLOAD
-          .replace("{{whatsapp}}", WHATSAPP_STAFF)
+          .WHATSAPP_STAFF.split("{{whatsapp}}").join(WHATSAPP_STAFF)
           .replace("{{monthsPrice}}", JSON.stringify(mp));
         return new Response(html, { headers: { "Content-Type": "text/html;charset=utf-8" } });
       }

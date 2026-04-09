@@ -169,6 +169,11 @@ async function handleUpload(e) {
     loading.textContent = "OCR 識別中...";
 
     try {
+      if (typeof Tesseract === 'undefined') {
+        alert('OCR 載入中，請稍後再試');
+        loading.classList.remove('show');
+        return;
+      }
       const result = await Tesseract.recognize(ev.target.result, 'eng+chi_tra', {
         logger: m => { if(m.status === 'recognizing text') loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%"; }
       });
@@ -190,6 +195,9 @@ async function handleUpload(e) {
       persons = [{name: name || '', phone: ''}];
       renderPersons();
       renderMonths();
+      if (Object.keys(MONTHS_PRICE).length === 0) {
+        alert('系統尚未設定月份，請聯絡職員');
+      }
     } catch(err) {
       loading.classList.remove('show');
       alert('OCR 失敗：' + err.message);
@@ -470,6 +478,11 @@ async function handleApi(req, env, url) {
     try {
       // Browser-side OCR using Tesseract.js - image never leaves browser
       loading.textContent = "OCR 識別中...";
+      if (typeof Tesseract === 'undefined') {
+        alert('OCR 載入中，請稍後再試');
+        loading.classList.remove('show');
+        return;
+      }
       const result = await Tesseract.recognize(ev.target.result, 'eng+chi_tra', {
         logger: m => { if(m.status === 'recognizing text') loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%"; }
       });

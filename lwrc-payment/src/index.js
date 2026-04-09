@@ -676,7 +676,7 @@ async function handleUpload(request, env) {
 
   // Upload image to R2
   const imageKey = `${month}/${member.id}_${Date.now()}_${image.name}`;
-  await env.PAYMENT_IMAGES.put(imageKey, image);
+  await env.IMAGES.put(imageKey, image);
 
   const imageUrl = imageKey; // Use key, not full URL
 
@@ -837,7 +837,7 @@ async function handleAnalyze(request, env) {
 
   // Upload image temporarily
   const imageKey = `temp/${Date.now()}_${image.name}`;
-  await env.PAYMENT_IMAGES.put(imageKey, image);
+  await env.IMAGES.put(imageKey, image);
 
   const aiResult = await analyzeImageGetResult(image, env);
 

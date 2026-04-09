@@ -1,0 +1,12 @@
+{
+  "name": "lwrc-payment-worker",
+  "version": "1.0.0",
+  "description": "LWRC 收費記錄系統 - Cloudflare Worker",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {}
+}

@@ -12,6 +12,7 @@ const PAGE_UPLOAD = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LWRC 繳費上傳</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f4;min-height:100vh;padding:20px}
@@ -156,7 +157,7 @@ const btnWhatsapp = document.getElementById('btnWhatsapp');
 fileInput.addEventListener('change', handleUpload);
 addPersonBtn.addEventListener('click', addPerson);
 
-function handleUpload(e) {
+async function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -165,31 +166,33 @@ function handleUpload(e) {
     preview.classList.remove('hidden');
     uploadZone.querySelector('.text').textContent = file.name;
     loading.classList.add('show');
+    loading.textContent = "OCR 識別中...";
 
-    const formData = new FormData();
-    formData.append('image', file);
     try {
-      const resp = await fetch('/api/ocr', { method: 'POST', body: formData });
-      const data = await resp.json();
+      const result = await Tesseract.recognize(ev.target.result, 'eng+chi_tra', {
+        logger: m => { if(m.status === 'recognizing text') loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%"; }
+      });
       loading.classList.remove('show');
-      if (data.success && data.data) {
-        ocrData = data.data;
-        aiTotal = parseInt(ocrData.amount) || 0;
-        document.getElementById('ocrName').textContent = ocrData.name || '-';
-        document.getElementById('ocrAmount').textContent = ocrData.amount ? 'HK$' + ocrData.amount : '-';
-        document.getElementById('ocrBank').textContent = ocrData.bank || '-';
-        step2.classList.remove('hidden');
-        step3.classList.remove('hidden');
-        step4.classList.remove('hidden');
-        persons = [{name: ocrData.name || '', phone: ''}];
-        renderPersons();
-        renderMonths();
-      } else {
-        alert('OCR 失敗：' + (data.error || '未知錯誤'));
-      }
+      const text = result.data.text;
+      // Extract amount (HK$) and name from text
+      const amountMatch = text.match(/HK\$\s*([0-9,]+)|([0-9,]+)\s*HK|HK\$?([0-9,]+)/);
+      const amount = amountMatch ? (amountMatch[1] || amountMatch[2] || amountMatch[3]).replace(/,/g, "") : null;
+      const nameMatch = text.match(/[\u4e00-\u9fff]{2,4}|[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}/);
+      const name = nameMatch ? nameMatch[0].trim() : null;
+      ocrData = { name, amount, bank: "OCR", raw: text.slice(0, 300) };
+      aiTotal = parseInt(amount) || 0;
+      document.getElementById('ocrName').textContent = name || '-';
+      document.getElementById('ocrAmount').textContent = amount ? 'HK$' + amount : '-';
+      document.getElementById('ocrBank').textContent = 'OCR';
+      step2.classList.remove('hidden');
+      step3.classList.remove('hidden');
+      step4.classList.remove('hidden');
+      persons = [{name: name || '', phone: ''}];
+      renderPersons();
+      renderMonths();
     } catch(err) {
       loading.classList.remove('show');
-      alert('上傳失敗：' + err.message);
+      alert('OCR 失敗：' + err.message);
     }
   };
   reader.readAsDataURL(file);
@@ -465,31 +468,22 @@ async function handleApi(req, env, url) {
     const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
 
     try {
-      // Use OCR.space free OCR API
-      const formDataOCR = new FormData();
-      formDataOCR.append("base64Image", "data:image/jpeg;base64," + base64);
-      formDataOCR.append("language", "eng");
-      formDataOCR.append("isOverlayRequired", "false");
-      formDataOCR.append("detectOrientation", "true");
-      formDataOCR.append("scale", "true");
-      formDataOCR.append("OCREngine", "2");
-
-      const resp = await fetch("https://api.ocr.space/parse/image", {
-        method: "POST",
-        headers: { "apikey": "helloworld" },
-        body: formDataOCR
+      // Browser-side OCR using Tesseract.js - image never leaves browser
+      loading.textContent = "OCR 識別中...";
+      const result = await Tesseract.recognize(ev.target.result, 'eng+chi_tra', {
+        logger: m => { if(m.status === 'recognizing text') loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%"; }
       });
-
-      const data = await resp.json();
-      const text = data?.ParsedResults?.[0]?.ParsedText || "";
+      loading.classList.remove('show');
+      const text = result.data.text;
       // Extract amount (HK$) and name from text
-      const amountMatch = text.match(/HK\$\s*([0-9,]+)|([0-9,]+)\s*HK/);
-      const amount = amountMatch ? (amountMatch[1] || amountMatch[2]).replace(/,/g, "") : null;
-      const nameMatch = text.match(/[A-Za-z\u4e00-\u9fff]{2,10}/);
-      const name = nameMatch ? nameMatch[0] : null;
-      return json({ success: true, data: { name, amount, bank: "OCR", raw: text.slice(0, 200) } });
+      const amountMatch = text.match(/HK\$\s*([0-9,]+)|([0-9,]+)\s*HK|HK\$?([0-9,]+)/);
+      const amount = amountMatch ? (amountMatch[1] || amountMatch[2] || amountMatch[3]).replace(/,/g, "") : null;
+      // Find Chinese or English names
+      const nameMatch = text.match(/[\u4e00-\u9fff]{2,4}|[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}/);
+      const name = nameMatch ? nameMatch[0].trim() : null;
+      return { success: true, data: { name, amount, bank: "OCR", raw: text.slice(0, 300) } };
     } catch (err) {
-      return json({ success: false, error: err.message });
+      return { success: false, error: err.message };
     }
   }
 

@@ -273,7 +273,7 @@ window.renderPersons = function() {
     const removeBtn = i > 0 ? '<button class="person-remove" onclick="window.removePerson(' + i + ')">移除</button>' : '';
     const nameVal = (p.name||'').replace(/"/g,'&quot;');
     const phoneVal = (p.phone||'').replace(/"/g,'&quot;');
-    return '<div class="person-card"><div class="person-header"><span class="person-name">' + label + '</span>' + removeBtn + '</div><input type="text" placeholder="姓名" value="' + nameVal + '" oninput="window.updatePerson(' + i + ', \'name\', this.value)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px"><input type="tel" placeholder="電話" value="' + phoneVal + '" oninput="window.updatePerson(' + i + ', \'phone\', this.value)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px"></div>';
+    return '<div class="person-card"><div class="person-header"><span class="person-name">' + label + '</span>' + removeBtn + '</div><input type="text" placeholder="姓名" value="' + nameVal + '" oninput="window.updatePerson(' + i + ',\'name\',this.value)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px"><input type="tel" placeholder="電話" value="' + phoneVal + '" oninput="window.updatePerson(' + i + ',\'phone\',this.value)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px"></div>';
   }).join('');
   container.innerHTML = html;
 };

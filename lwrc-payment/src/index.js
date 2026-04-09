@@ -1,5 +1,5 @@
 /**
- * LWRC 繳費系統 v6 - 參加者一頁流程
+ * LWRC 繳費系統 v7 - 參加者一頁流程 (最簡單版，確保 work)
  */
 const WHATSAPP_STAFF = "85261789563";
 
@@ -78,7 +78,7 @@ h1{color:#1a73e8;text-align:center;margin-bottom:20px;font-size:22px}
 <span class="step-title">上傳轉帳截圖</span>
 </div>
 <label class="upload-zone" id="uploadZone">
-<input type="file" accept="image/*" id="fileInput">
+<input type="file" accept="image/*" id="fileInput" onchange="window.handleUpload(this)">
 <div class="icon">📷</div>
 <div class="text">點擊選擇圖片或拍照</div>
 </label>
@@ -108,7 +108,7 @@ h1{color:#1a73e8;text-align:center;margin-bottom:20px;font-size:22px}
 </div>
 
 <div id="personsList"></div>
-<button class="add-person-btn" id="addPersonBtn">+ 加入另一人</button>
+<button class="add-person-btn" id="addPersonBtn" onclick="window.addPerson()">+ 加入另一人</button>
 
 <div class="split-section" id="monthsSection" style="margin-top:20px;">
 <p style="font-size:14px;color:#666;margin-bottom:10px;">請剔選要繳的月份：</p>
@@ -123,12 +123,14 @@ h1{color:#1a73e8;text-align:center;margin-bottom:20px;font-size:22px}
 
 <!-- STEP 4: Submit -->
 <div class="card hidden" id="step4">
-<button class="btn-submit disabled" id="btnSubmit" disabled>請先確認月份</button>
+<button class="btn-submit disabled" id="btnSubmit" onclick="window.doSubmit()">請先確認月份</button>
 <button class="btn-whatsapp" id="btnWhatsapp" onclick="window.open('https://wa.me/{{whatsapp}}','_blank')">WhatsApp 聯絡職員</button>
 </div>
 </div>
 
 <script>
+console.log('[LWRC] Script loaded, Tesseract:', typeof Tesseract);
+
 const WHATSAPP = "{{whatsapp}}";
 const MONTHS_PRICE = {{monthsPrice}};
 
@@ -137,109 +139,164 @@ let persons = [];
 let selectedMonths = new Set();
 let aiTotal = 0;
 
-const fileInput = document.getElementById('fileInput');
-const uploadZone = document.getElementById('uploadZone');
-const preview = document.getElementById('preview');
-const loading = document.getElementById('loading');
-const ocrResult = document.getElementById('ocrResult');
-const step2 = document.getElementById('step2');
-const step3 = document.getElementById('step3');
-const step4 = document.getElementById('step4');
-const personsList = document.getElementById('personsList');
-const addPersonBtn = document.getElementById('addPersonBtn');
-const monthsSection = document.getElementById('monthsSection');
-const monthsGrid = document.getElementById('monthsGrid');
-const totalAmount = document.getElementById('totalAmount');
-const matchStatus = document.getElementById('matchStatus');
-const btnSubmit = document.getElementById('btnSubmit');
-const btnWhatsapp = document.getElementById('btnWhatsapp');
+// ── Step 1: Upload + OCR ────────────────────────────────────────
+window.handleUpload = async function(inputEl) {
+  console.log('[handleUpload] called, files:', inputEl.files ? inputEl.files.length : 0);
+  const file = inputEl.files[0];
+  if (!file) {
+    console.log('[handleUpload] no file selected');
+    return;
+  }
+  console.log('[handleUpload] file:', file.name, file.size, file.type);
 
-fileInput.addEventListener('change', handleUpload);
-addPersonBtn.addEventListener('click', addPerson);
-
-async function handleUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  // Show preview
   const reader = new FileReader();
-  reader.onload = async (ev) => {
-    preview.innerHTML = '<img src="' + ev.target.result + '" alt="preview">';
-    preview.classList.remove('hidden');
-    uploadZone.querySelector('.text').textContent = file.name;
-    loading.classList.add('show');
-    loading.textContent = "OCR 識別中...";
-
-    try {
-      if (typeof Tesseract === 'undefined') {
-        alert('OCR 載入中，請稍後再試');
-        loading.classList.remove('show');
-        return;
-      }
-      const result = await Tesseract.recognize(ev.target.result, 'eng+chi_tra', {
-        logger: m => { if(m.status === 'recognizing text') loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%"; }
-      });
-      loading.classList.remove('show');
-      const text = result.data.text;
-      // Extract amount (HK$) and name from text
-      const amountMatch = text.match(/HK\$\s*([0-9,]+)|([0-9,]+)\s*HK|HK\$?([0-9,]+)/);
-      const amount = amountMatch ? (amountMatch[1] || amountMatch[2] || amountMatch[3]).replace(/,/g, "") : null;
-      const nameMatch = text.match(/[\u4e00-\u9fff]{2,4}|[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}/);
-      const name = nameMatch ? nameMatch[0].trim() : null;
-      ocrData = { name, amount, bank: "OCR", raw: text.slice(0, 300) };
-      aiTotal = parseInt(amount) || 0;
-      document.getElementById('ocrName').textContent = name || '-';
-      document.getElementById('ocrAmount').textContent = amount ? 'HK$' + amount : '-';
-      document.getElementById('ocrBank').textContent = 'OCR';
-      step2.classList.remove('hidden');
-      step3.classList.remove('hidden');
-      step4.classList.remove('hidden');
-      persons = [{name: name || '', phone: ''}];
-      renderPersons();
-      renderMonths();
-      if (Object.keys(MONTHS_PRICE).length === 0) {
-        alert('系統尚未設定月份，請聯絡職員');
-      }
-    } catch(err) {
-      loading.classList.remove('show');
-      alert('OCR 失敗：' + err.message);
-    }
+  reader.onload = function(ev) {
+    console.log('[handleUpload] FileReader loaded');
+    document.getElementById('preview').innerHTML = '<img src="' + ev.target.result + '" alt="preview">';
+    document.getElementById('preview').classList.remove('hidden');
+    document.getElementById('uploadZone').querySelector('.text').textContent = file.name;
   };
   reader.readAsDataURL(file);
-}
 
-function addPerson() {
+  // Show loading
+  const loading = document.getElementById('loading');
+  loading.classList.add('show');
+  loading.textContent = "OCR 載入模型中...";
+
+  // Wait for Tesseract to be available
+  console.log('[handleUpload] waiting for Tesseract, current:', typeof Tesseract);
+  let attempts = 0;
+  while (typeof Tesseract === 'undefined' && attempts < 50) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
+    console.log('[handleUpload] waiting... attempt', attempts);
+  }
+
+  if (typeof Tesseract === 'undefined') {
+    console.error('[handleUpload] Tesseract still undefined after waiting');
+    loading.classList.remove('show');
+    alert('OCR 載入失敗，請刷新頁面重試');
+    return;
+  }
+
+  console.log('[handleUpload] Tesseract ready, starting OCR');
+  loading.textContent = "OCR 識別中...";
+
+  try {
+    const result = await Tesseract.recognize(file, 'eng+chi_tra', {
+      logger: m => {
+        console.log('[OCR]', m.status, m.progress);
+        if (m.status === 'recognizing text') {
+          loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%";
+        }
+      }
+    });
+
+    console.log('[handleUpload] OCR complete, text:', result.data.text.substring(0, 200));
+    loading.classList.remove('show');
+
+    const text = result.data.text;
+
+    // Extract amount
+    let amount = null;
+    const amountPatterns = [
+      /HK\$\s*([0-9,]+)/,
+      /([0-9,]+)\s*HK/,
+      /HKD\s*([0-9,]+)/i,
+      /(?:amount|金額|銀碼)[:\s]*([0-9,]+)/i
+    ];
+    for (const pat of amountPatterns) {
+      const m = text.match(pat);
+      if (m) { amount = m[1].replace(/,/g, ''); break; }
+    }
+    if (!amount) {
+      // Try to find any standalone number that looks like money
+      const nums = text.match(/[0-9]{3,6}/g);
+      if (nums) amount = nums[0];
+    }
+
+    // Extract name (Chinese or English)
+    let name = null;
+    const nameMatch = text.match(/[\u4e00-\u9fff]{2,4}/);
+    if (nameMatch) name = nameMatch[0];
+
+    aiTotal = parseInt(amount) || 0;
+    ocrData = { name, amount, bank: "OCR", raw: text.slice(0, 300) };
+
+    console.log('[handleUpload] extracted - name:', name, 'amount:', aiTotal);
+
+    document.getElementById('ocrName').textContent = name || '(未識別)';
+    document.getElementById('ocrAmount').textContent = amount ? 'HK$' + amount : '(未識別)';
+    document.getElementById('ocrBank').textContent = 'OCR';
+    document.getElementById('ocrResult').classList.add('show');
+
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('step3').classList.remove('hidden');
+    document.getElementById('step4').classList.remove('hidden');
+
+    persons = [{name: name || '', phone: ''}];
+    window.renderPersons();
+    window.renderMonths();
+    window.updateTotal();
+
+    if (Object.keys(MONTHS_PRICE).length === 0) {
+      alert('系統尚未設定月份，請聯絡職員');
+    }
+
+  } catch(err) {
+    console.error('[handleUpload] OCR error:', err);
+    loading.classList.remove('show');
+    alert('OCR 失敗：' + err.message);
+  }
+};
+
+// ── Person management ───────────────────────────────────────────
+window.addPerson = function() {
+  console.log('[addPerson] current persons:', persons.length);
   persons.push({name: '', phone: ''});
-  renderPersons();
-}
+  window.renderPersons();
+};
 
-function removePerson(i) {
+window.removePerson = function(i) {
+  console.log('[removePerson] index:', i);
   persons.splice(i, 1);
-  renderPersons();
-  updateTotal();
-}
+  window.renderPersons();
+  window.updateTotal();
+};
 
-function renderPersons() {
-  personsList.innerHTML = persons.map((p, i) => '
-    <div class="person-card">
-      <div class="person-header">
-        <span class="person-name">' + (i === 0 ? '主要付款人' : '同行人 ' + i) + '</span>
-        ' + (i > 0 ? '<button class="person-remove" onclick="removePerson(' + i + ')">移除</button>' : '') + '
-      </div>
-      <input type="text" placeholder="姓名" value="' + (p.name||'').replace(/"/g,'&quot;') + '" onchange="persons[' + i + '].name=this.value" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px">
-      <input type="tel" placeholder="電話" value="' + (p.phone||'').replace(/"/g,'&quot;') + '" onchange="persons[' + i + '].phone=this.value" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px">
-    </div>
-  ').join('');
-}
+window.renderPersons = function() {
+  console.log('[renderPersons] persons:', persons.length);
+  const container = document.getElementById('personsList');
+  const html = persons.map((p, i) => {
+    const label = i === 0 ? '主要付款人' : '同行人 ' + i;
+    const removeBtn = i > 0 ? '<button class="person-remove" onclick="window.removePerson(' + i + ')">移除</button>' : '';
+    const nameVal = (p.name||'').replace(/"/g,'&quot;');
+    const phoneVal = (p.phone||'').replace(/"/g,'&quot;');
+    return '<div class="person-card"><div class="person-header"><span class="person-name">' + label + '</span>' + removeBtn + '</div><input type="text" placeholder="姓名" value="' + nameVal + '" oninput="window.updatePerson(' + i + ', \'name\', this.value)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px"><input type="tel" placeholder="電話" value="' + phoneVal + '" oninput="window.updatePerson(' + i + ', \'phone\', this.value)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px"></div>';
+  }).join('');
+  container.innerHTML = html;
+};
 
-function renderMonths() {
-  monthsGrid.innerHTML = Object.entries(MONTHS_PRICE).map(([id, info]) => '
-    <div class="month-chip" data-month="' + id + '" onclick="toggleMonth(\'' + id + '\')">
-      ' + info.name + ' $' + info.price + '
-    </div>
-  ').join('');
-}
+window.updatePerson = function(i, field, val) {
+  console.log('[updatePerson]', i, field, val);
+  if (persons[i]) persons[i][field] = val;
+};
 
-function toggleMonth(monthId) {
-  const chip = monthsGrid.querySelector('[data-month="' + monthId + '"]');
+// ── Month management ───────────────────────────────────────────
+window.renderMonths = function() {
+  console.log('[renderMonths] months:', Object.keys(MONTHS_PRICE).length);
+  const grid = document.getElementById('monthsGrid');
+  const html = Object.entries(MONTHS_PRICE).map(([id, info]) => {
+    return '<div class="month-chip" data-month="' + id + '" onclick="window.toggleMonth(\'' + id + '\')">' + info.name + ' $' + info.price + '</div>';
+  }).join('');
+  grid.innerHTML = html;
+  console.log('[renderMonths] rendered', grid.children.length, 'chips');
+};
+
+window.toggleMonth = function(monthId) {
+  console.log('[toggleMonth]', monthId, 'selected:', selectedMonths.has(monthId));
+  const chip = document.querySelector('[data-month="' + monthId + '"]');
   if (chip.classList.contains('paid')) return;
   if (selectedMonths.has(monthId)) {
     selectedMonths.delete(monthId);
@@ -248,13 +305,19 @@ function toggleMonth(monthId) {
     selectedMonths.add(monthId);
     chip.classList.add('selected');
   }
-  updateTotal();
-}
+  window.updateTotal();
+};
 
-function updateTotal() {
+window.updateTotal = function() {
   let sum = 0;
   selectedMonths.forEach(m => { sum += MONTHS_PRICE[m]?.price || 0; });
-  totalAmount.textContent = 'HK$' + sum;
+  console.log('[updateTotal] sum:', sum, 'aiTotal:', aiTotal);
+
+  document.getElementById('totalAmount').textContent = 'HK$' + sum;
+  const matchStatus = document.getElementById('matchStatus');
+  const btnSubmit = document.getElementById('btnSubmit');
+  const btnWhatsapp = document.getElementById('btnWhatsapp');
+
   if (aiTotal > 0 && sum === aiTotal) {
     matchStatus.innerHTML = ' <span class="match-ok">✓ 金額符合</span>';
     btnSubmit.className = 'btn-submit ready';
@@ -262,7 +325,7 @@ function updateTotal() {
     btnSubmit.textContent = '確認上傳';
     btnWhatsapp.classList.remove('show');
   } else if (sum > 0) {
-    matchStatus.innerHTML = ' <span class="match-fail">✗ 金額不符 (AI:HK$' + aiTotal + ')</span>';
+    matchStatus.innerHTML = ' <span class="match-fail">✗ 金額不符 (AI:HK$' + aiTotal + ' vs 選了:HK$' + sum + ')</span>';
     btnSubmit.className = 'btn-submit disabled';
     btnSubmit.disabled = true;
     btnSubmit.textContent = '金額不符';
@@ -274,20 +337,29 @@ function updateTotal() {
     btnSubmit.textContent = '請先剔選月份';
     btnWhatsapp.classList.remove('show');
   }
-}
+};
 
-btnSubmit.addEventListener('click', async () => {
+// ── Submit ──────────────────────────────────────────────────────
+window.doSubmit = async function() {
+  console.log('[doSubmit] persons:', JSON.stringify(persons), 'months:', [...selectedMonths]);
+  const btnSubmit = document.getElementById('btnSubmit');
+  const fileInput = document.getElementById('fileInput');
+
   const formData = new FormData();
   formData.append('persons', JSON.stringify(persons));
   formData.append('months', JSON.stringify([...selectedMonths]));
   formData.append('ai_total', aiTotal);
-  const file = fileInput.files[0];
-  if (file) formData.append('image', file);
+  if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
+
   btnSubmit.textContent = '上傳中...';
   btnSubmit.disabled = true;
+
   try {
+    console.log('[doSubmit] sending POST /api/submit');
     const resp = await fetch('/api/submit', { method: 'POST', body: formData });
     const data = await resp.json();
+    console.log('[doSubmit] response:', JSON.stringify(data));
+
     if (data.success) {
       btnSubmit.textContent = '✓ 已上傳';
       btnSubmit.className = 'btn-submit ready';
@@ -298,17 +370,20 @@ btnSubmit.addEventListener('click', async () => {
       alert('上傳失敗：' + (data.error || ''));
     }
   } catch(err) {
+    console.error('[doSubmit] error:', err);
     btnSubmit.textContent = '上傳失敗';
     btnSubmit.disabled = false;
     alert('上傳失敗：' + err.message);
   }
-});
+};
+
+console.log('[LWRC] Setup complete, waiting for upload...');
 </script>
 </body>
 </html>`;
 
 // ─────────────────────────────────────────────────────────────────
-// Dashboard (keep from v5)
+// Dashboard (keep from v6)
 // ─────────────────────────────────────────────────────────────────
 const PAGE_DASHBOARD = `<!DOCTYPE html>
 <html lang="zh-Hant">
@@ -463,41 +538,7 @@ async function handleApi(req, env, url) {
 
   // Health
   if (path === "/api/health") {
-    return json({ status: "ok", version: "v6" });
-  }
-
-  // OCR - image upload
-  if (path === "/api/ocr" && method === "POST") {
-    const formData = await req.formData();
-    const image = formData.get("image");
-    if (!image) return json({ success: false, error: "No image" });
-
-    const imageBuffer = await image.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
-
-    try {
-      // Browser-side OCR using Tesseract.js - image never leaves browser
-      loading.textContent = "OCR 識別中...";
-      if (typeof Tesseract === 'undefined') {
-        alert('OCR 載入中，請稍後再試');
-        loading.classList.remove('show');
-        return;
-      }
-      const result = await Tesseract.recognize(ev.target.result, 'eng+chi_tra', {
-        logger: m => { if(m.status === 'recognizing text') loading.textContent = "OCR 識別中... " + Math.round(m.progress * 100) + "%"; }
-      });
-      loading.classList.remove('show');
-      const text = result.data.text;
-      // Extract amount (HK$) and name from text
-      const amountMatch = text.match(/HK\$\s*([0-9,]+)|([0-9,]+)\s*HK|HK\$?([0-9,]+)/);
-      const amount = amountMatch ? (amountMatch[1] || amountMatch[2] || amountMatch[3]).replace(/,/g, "") : null;
-      // Find Chinese or English names
-      const nameMatch = text.match(/[\u4e00-\u9fff]{2,4}|[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}/);
-      const name = nameMatch ? nameMatch[0].trim() : null;
-      return { success: true, data: { name, amount, bank: "OCR", raw: text.slice(0, 300) } };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
+    return json({ status: "ok", version: "v7" });
   }
 
   // Submit payment

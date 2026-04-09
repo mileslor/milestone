@@ -35,18 +35,35 @@ const HTML_UPLOAD_PAGE = `
     .image-preview img { max-width: 100%; max-height: 280px; border-radius: 8px; border: 2px dashed #ddd; }
     .image-preview .placeholder { color: #aaa; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
     .image-preview .placeholder span { font-size: 40px; }
-    .ocr-result { margin-top: 10px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; }
-    .ocr-result.loading { background: #fff3cd; color: #856404; display: block; }
-    .ocr-result.success { background: #d4edda; color: #155724; display: block; }
-    .ocr-result.error { background: #f8d7da; color: #721c24; display: block; }
-    .ocr-name { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 12px; }
-    .ocr-name.match { background: #c8e6c9; color: #2e7d32; }
-    .ocr-name.mismatch { background: #ffcdd2; color: #c62828; }
+
+    /* OCR Loading */
+    .ocr-loading { margin-top: 10px; padding: 12px; border-radius: 8px; font-size: 13px; background: #fff3cd; color: #856404; display: none; }
+    .ocr-loading.show { display: block; }
+
+    /* OCR Result Card */
+    .ocr-card { margin-top: 16px; border: 2px solid #28a745; border-radius: 12px; padding: 16px; background: #f8fff8; display: none; }
+    .ocr-card.show { display: block; }
+    .ocr-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .ocr-card-title { font-size: 14px; font-weight: 600; color: #28a745; }
+    .ocr-card-badge { background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+    .ocr-field { margin-bottom: 12px; }
+    .ocr-field label { font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
+    .ocr-field input { padding: 8px 10px; font-size: 14px; background: #fff; }
+    .ocr-field input:focus { border-color: #28a745; outline: none; }
+    .ocr-original { font-size: 11px; color: #aaa; margin-top: 2px; }
+
     .other-member-row { display: flex; gap: 8px; margin-bottom: 8px; }
     .other-member-row input { flex: 1; }
     .btn-remove { background: #ff4444; color: white; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-size: 18px; line-height: 1; }
     .btn-add { width: 100%; padding: 10px; background: #f0f0f0; color: #333; border: 1px dashed #ccc; border-radius: 8px; cursor: pointer; font-size: 14px; }
     .btn-add:hover { background: #e8e8e8; }
+
+    /* Confirm step */
+    .confirm-section { margin-top: 20px; display: none; }
+    .confirm-section.show { display: block; }
+    .btn-confirm { width: 100%; padding: 14px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-confirm:hover { background: #218838; }
+
     button[type="submit"] { width: 100%; padding: 14px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
     button[type="submit"]:hover { background: #1557b0; }
     button[type="submit"]:disabled { background: #ccc; cursor: not-allowed; }
@@ -71,7 +88,31 @@ const HTML_UPLOAD_PAGE = `
             <span>上傳圖片自動 OCR</span>
           </div>
         </div>
-        <div class="ocr-result" id="ocrResult"></div>
+        <div class="ocr-loading" id="ocrLoading">🔄 AI 識別中...</div>
+
+        <!-- OCR 識別結果卡片 -->
+        <div class="ocr-card" id="ocrCard">
+          <div class="ocr-card-header">
+            <span class="ocr-card-title">✅ AI 識別結果</span>
+            <span class="ocr-card-badge" id="ocrConfidence"></span>
+          </div>
+          <div class="ocr-field">
+            <label>姓名 <span class="ocr-original" id="ocrNameOrig"></span></label>
+            <input type="text" id="ocrName" placeholder="陳大明">
+          </div>
+          <div class="ocr-field">
+            <label>金額（HKD）<span class="ocr-original" id="ocrAmountOrig"></span></label>
+            <input type="text" id="ocrAmount" placeholder="HK$500">
+          </div>
+          <div class="ocr-field">
+            <label>銀行 <span class="ocr-original" id="ocrBankOrig"></span></label>
+            <input type="text" id="ocrBank" placeholder="HSBC">
+          </div>
+          <div class="ocr-field">
+            <label>過數編號 <span class="ocr-original" id="ocrRefOrig"></span></label>
+            <input type="text" id="ocrRef" placeholder="ABC123">
+          </div>
+        </div>
       </div>
 
       <!-- 繳費月份 -->
@@ -101,7 +142,12 @@ const HTML_UPLOAD_PAGE = `
       </div>
       <button type="button" class="btn-add" id="btnAddMember" onclick="addOtherMember()">+ 加入其他人</button>
 
-      <button type="submit" id="submitBtn" style="margin-top: 24px;">上傳</button>
+      <!-- 確認按鈕（解鎖後可按） -->
+      <div class="confirm-section" id="confirmSection">
+        <button type="button" class="btn-confirm" id="confirmBtn" onclick="confirmOcr()">✅ 確認無誤，上傳</button>
+      </div>
+
+      <button type="submit" id="submitBtn" style="margin-top: 16px;" disabled>上傳</button>
       <div class="message" id="message"></div>
     </form>
   </div>
@@ -109,10 +155,13 @@ const HTML_UPLOAD_PAGE = `
     const form = document.getElementById('uploadForm');
     const preview = document.getElementById('imagePreview');
     const placeholder = document.getElementById('placeholder');
-    const ocrResult = document.getElementById('ocrResult');
-    const message = document.getElementById('message');
+    const ocrLoading = document.getElementById('ocrLoading');
+    const ocrCard = document.getElementById('ocrCard');
+    const confirmSection = document.getElementById('confirmSection');
     const submitBtn = document.getElementById('submitBtn');
+    const message = document.getElementById('message');
     let uploadedImageUrl = null;
+    let ocrConfirmed = false;
 
     // Set default month to next month
     const now = new Date();
@@ -138,10 +187,31 @@ const HTML_UPLOAD_PAGE = `
       btn.parentElement.remove();
     }
 
+    // User clicks "確認無誤，上傳"
+    function confirmOcr() {
+      ocrConfirmed = true;
+      // Copy OCR fields to form fields
+      const ocrName = document.getElementById('ocrName').value.trim();
+      if (ocrName) {
+        document.getElementById('name').value = ocrName;
+      }
+      confirmSection.style.display = 'none';
+      ocrCard.style.borderColor = '#888';
+      submitBtn.disabled = false;
+      submitBtn.textContent = '📤 確認上傳';
+    }
+
     // Image preview + auto OCR
     document.getElementById('image').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
+
+      // Reset state
+      ocrConfirmed = false;
+      ocrCard.classList.remove('show');
+      confirmSection.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '上傳';
 
       // Show preview immediately
       const reader = new FileReader();
@@ -155,10 +225,8 @@ const HTML_UPLOAD_PAGE = `
       };
       reader.readAsDataURL(file);
 
-      // Auto OCR
-      ocrResult.className = 'ocr-result loading';
-      ocrResult.textContent = '🔄 AI 識別中...';
-      ocrResult.style.display = 'block';
+      // Show loading
+      ocrLoading.classList.add('show');
 
       const formData = new FormData();
       formData.append('image', file);
@@ -167,37 +235,50 @@ const HTML_UPLOAD_PAGE = `
         const res = await fetch('/api/analyze', { method: 'POST', body: formData });
         const data = await res.json();
 
+        ocrLoading.classList.remove('show');
+
         if (res.ok && data.success) {
           uploadedImageUrl = data.imageUrl;
           const ai = data.aiResult;
-          let html = '✅ 識別到以下名字：';
-          if (ai.names && ai.names.length > 0) {
-            html += '<br>';
-            ai.names.forEach(n => {
-              const cls = ai.matches && ai.matches.includes(n) ? 'match' : 'mismatch';
-              html += '<span class="ocr-name ' + cls + '">' + n + '</span>';
-            });
+
+          // Populate OCR card
+          document.getElementById('ocrName').value = ai.name || '';
+          document.getElementById('ocrAmount').value = ai.amount || '';
+          document.getElementById('ocrBank').value = ai.bank || '';
+          document.getElementById('ocrRef').value = ai.reference || '';
+
+          // Show original values as hint
+          document.getElementById('ocrNameOrig').textContent = ai.name ? '(辨識: ' + ai.name + ')' : '';
+          document.getElementById('ocrAmountOrig').textContent = ai.amount ? '(辨識: ' + ai.amount + ')' : '';
+          document.getElementById('ocrBankOrig').textContent = ai.bank ? '(辨識: ' + ai.bank + ')' : '';
+          document.getElementById('ocrRefOrig').textContent = ai.reference ? '(辨識: ' + ai.reference + ')' : '';
+
+          const conf = ai.confidence !== undefined ? ai.confidence + '%' : '—';
+          document.getElementById('ocrConfidence').textContent = '置信度: ' + conf;
+
+          ocrCard.classList.add('show');
+          confirmSection.classList.add('show');
+
+          // Pre-fill name field if OCR detected one
+          if (ai.name) {
+            document.getElementById('name').value = ai.name;
           }
-          if (ai.extractedText) {
-            html += '<br><small style="color:#888;">提取文字：' + ai.extractedText.substring(0, 100) + '...</small>';
-          }
-          if (ai.confidence !== undefined) {
-            html += '<br><small>置信度：' + ai.confidence + '%</small>';
-          }
-          ocrResult.innerHTML = html;
-          ocrResult.className = 'ocr-result success';
         } else {
-          ocrResult.textContent = '⚠️ AI 識別失敗：' + (data.error || '請稍後再試');
-          ocrResult.className = 'ocr-result error';
+          // Show card with empty fields for manual entry
+          ocrCard.classList.add('show');
+          confirmSection.classList.add('show');
+          document.getElementById('ocrConfidence').textContent = '置信度: —';
         }
       } catch (err) {
-        ocrResult.textContent = '❌ 網絡錯誤';
-        ocrResult.className = 'ocr-result error';
+        ocrLoading.classList.remove('show');
+        ocrCard.classList.add('show');
+        confirmSection.classList.add('show');
       }
     });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!ocrConfirmed) return;
       submitBtn.disabled = true;
       submitBtn.textContent = '上傳中...';
       message.className = 'message';
@@ -209,12 +290,21 @@ const HTML_UPLOAD_PAGE = `
         if (input.value.trim()) otherNames.push(input.value.trim());
       });
 
+      // Gather OCR data
+      const ocrData = {
+        name: document.getElementById('ocrName').value.trim(),
+        amount: document.getElementById('ocrAmount').value.trim(),
+        bank: document.getElementById('ocrBank').value.trim(),
+        reference: document.getElementById('ocrRef').value.trim()
+      };
+
       const formData = new FormData();
       formData.append('phone', document.getElementById('phone').value);
       formData.append('name', document.getElementById('name').value);
       formData.append('month', document.getElementById('month').value);
       formData.append('image', document.getElementById('image').files[0]);
       formData.append('other_members', JSON.stringify(otherNames));
+      formData.append('ocr_data', JSON.stringify(ocrData));
 
       try {
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
@@ -227,7 +317,12 @@ const HTML_UPLOAD_PAGE = `
           message.className = 'message success';
           form.reset();
           preview.innerHTML = '<div class="placeholder" id="placeholder"><span>📷</span><span>上傳圖片自動 OCR</span></div>';
-          ocrResult.style.display = 'none';
+          ocrCard.classList.remove('show');
+          ocrLoading.classList.remove('show');
+          confirmSection.classList.remove('show');
+          submitBtn.disabled = true;
+          submitBtn.textContent = '上傳';
+          ocrConfirmed = false;
           // Reset other members
           document.getElementById('otherMembersContainer').innerHTML = \`
             <div class="other-member-row" data-index="0">
@@ -239,14 +334,15 @@ const HTML_UPLOAD_PAGE = `
         } else {
           message.textContent = '❌ ' + (data.error || '上傳失敗');
           message.className = 'message error';
+          submitBtn.disabled = false;
+          submitBtn.textContent = '📤 確認上傳';
         }
       } catch (err) {
         message.textContent = '❌ 網絡錯誤，請稍後再試';
         message.className = 'message error';
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📤 確認上傳';
       }
-
-      submitBtn.disabled = false;
-      submitBtn.textContent = '上傳';
     });
   </script>
 </body>
@@ -735,7 +831,7 @@ async function handleUpload(request, env) {
   });
 }
 
-// Analyze image and return result (without storing)
+// Analyze image and return structured result (name, amount, bank, reference)
 async function analyzeImageGetResult(imageFile, env) {
   if (!env.MINIMAX_API_KEY) {
     return { error: 'MiniMax API key not configured', confidence: 0 };
@@ -749,77 +845,120 @@ async function analyzeImageGetResult(imageFile, env) {
     const members = await env.DB.prepare('SELECT name FROM members').all();
     const memberNames = members.results?.map(m => m.name) || [];
 
-    // Call MiniMax Vision API
-    const response = await fetch('https://api.minimax.com/v1/images/describe', {
+    // Build prompt for structured extraction
+    const prompt = `請仔細分析這張銀行轉帳截圖，從圖片中識別並提取以下資訊，以JSON格式回覆：
+{
+  "name": "付款人姓名",
+  "amount": "金額（港幣）",
+  "bank": "銀行名稱",
+  "reference": "過數編號/轉帳參考號"
+}
+規則：
+- name: 付款人姓名（中文或英文）
+- amount: 金額，只需數字，例如 "500"
+- bank: 銀行名稱，例如 "HSBC", "恒生", "中銀"
+- reference: 轉帳參考編號或交易編號
+- extractedText: 圖片中所有識別到的文字（完整原文）
+- 如果某項資訊無法識別，該欄位留空字串
+- 只回覆JSON，不要其他文字`;
+
+    // Try minimax.com first, then minimaxi.com
+    let result;
+    const requestBody = {
+      model: 'image-01',
+      image_base64: base64Image,
+      prompt
+    };
+
+    let apiResponse = await fetch('https://api.minimax.com/v1/images/describe', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${env.MINIMAX_API_KEY}`,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(requestBody)
     });
 
-    // If minimax.com fails, try minimaxi.com
-    let result;
-    if (!response.ok) {
+    if (!apiResponse.ok) {
       // Try alternative endpoint
-      const altResponse = await fetch('https://api.minimaxi.com/v1/images/describe', {
+      apiResponse = await fetch('https://api.minimaxi.com/v1/images/describe', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${env.MINIMAX_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: 'image-01',
-          image_base64: base64Image,
-          prompt: '請識別這張繳費截圖中的所有文字內容，包括姓名、日期、金額。以JSON格式回傳：{names: ["姓名1", "姓名2"], amounts: [數字], extractedText: "完整文字"}'
-        })
+        body: JSON.stringify(requestBody)
       });
-      if (!altResponse.ok) {
-        console.error('MiniMax API error:', await altResponse.text());
-        return { confidence: 0, names: [], matches: [] };
+
+      if (!apiResponse.ok) {
+        console.error('MiniMax API error:', await apiResponse.text());
+        return { confidence: 0, name: '', amount: '', bank: '', reference: '' };
       }
-      result = await altResponse.json();
-    } else {
-      result = await response.json();
     }
 
+    result = await apiResponse.json();
     const extractedText = result.data?.description || result.data?.text || '';
-    
-    // Extract names from AI response
-    let names = [];
+
+    // Parse structured result
+    let name = '', amount = '', bank = '', reference = '';
     try {
       const parsed = JSON.parse(extractedText);
-      if (parsed.names) names = parsed.names;
-      else if (Array.isArray(parsed)) names = parsed;
+      name = parsed.name || '';
+      amount = parsed.amount || '';
+      bank = parsed.bank || '';
+      reference = parsed.reference || '';
     } catch {
-      // Try to extract Chinese names from text
-      const chineseNameRegex = /[\u4e00-\u9fa5]{2,4}/g;
-      names = extractedText.match(chineseNameRegex) || [];
-      // Deduplicate and filter
-      names = [...new Set(names)];
+      // Fallback: try to extract from raw text
+      const text = extractedText;
+
+      // Extract amount - look for HK$ or numbers near "HKD" or amount keywords
+      const amountMatch = text.match(/HK\$\s*([\d,]+)|HKD[:\s]*([\d,]+)|金額[:\s]*([\d,]+)|([\d,]+)\s*元/);
+      if (amountMatch) {
+        amount = (amountMatch[1] || amountMatch[2] || amountMatch[3] || amountMatch[4] || '').replace(/,/g, '');
+      }
+
+      // Extract bank names
+      const bankPatterns = ['HSBC', '恒生', '中國銀行', '中銀', 'BOCHK', 'Citibank', '滙豐', '渣打', 'SCB', '東亞', 'BEA', '招商銀行', 'CMB'];
+      for (const bp of bankPatterns) {
+        if (text.includes(bp)) { bank = bp; break; }
+      }
+
+      // Extract reference - usually has keywords like 參考, reference, 編號, ID
+      const refMatch = text.match(/參考[號碼]*[:\s]*([A-Z0-9]{6,})|reference[:\s]*([A-Z0-9]{6,})|編號[:\s]*([A-Z0-9]{6,})/i);
+      if (refMatch) {
+        reference = (refMatch[1] || refMatch[2] || refMatch[3] || '').toUpperCase();
+      }
+
+      // Extract name - usually Chinese 2-4 characters
+      const nameMatch = text.match(/[\u4e00-\u9fa5]{2,4}/);
+      if (nameMatch) name = nameMatch[0];
     }
 
-    // Match names against member list
+    // Match name against member list
     const matches = [];
-    names.forEach(n => {
-      const matched = memberNames.find(mn => mn.includes(n) || n.includes(mn));
-      if (matched) matches.push(n);
-    });
+    if (name) {
+      const matched = memberNames.find(mn => mn.includes(name) || name.includes(mn));
+      if (matched) matches.push(name);
+    }
 
-    const confidence = matches.length > 0 
-      ? Math.min(95, 50 + matches.length * 15)
-      : 0;
+    // Confidence based on how many fields were filled
+    const filledCount = [name, amount, bank, reference].filter(v => v).length;
+    const confidence = Math.min(95, filledCount * 20 + (matches.length > 0 ? 20 : 0));
 
     return {
+      name,
+      amount,
+      bank,
+      reference,
       extractedText,
-      names,
+      names: name ? [name] : [],
       matches,
       confidence,
       raw: result.data || {}
     };
   } catch (err) {
     console.error('AI analysis error:', err);
-    return { confidence: 0, names: [], matches: [], error: err.message };
+    return { confidence: 0, name: '', amount: '', bank: '', reference: '', names: [], matches: [] };
   }
 }
 

@@ -1,0 +1,12 @@
+name = "lwrc-payment"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "lwrc-payment"
+database_id = "5e7ae082-6942-4f07-a9f1-f6efff9727bc"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "lwrc-payment-images"

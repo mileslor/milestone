@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaraQueue — 本地 WiFi KTV 點歌系統 | Milestone Technology</title>
+  <meta name="description" content="KaraQueue 是一款免費開源的本地 WiFi KTV 點歌系統，透過 YouTube 播放，手機掃碼即可點歌，支援 AI 自動建立歌手歌庫。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'Noto Sans HK', 'system-ui', 'sans-serif'] },
+          colors: {
+            background: 'hsl(210, 20%, 98%)',
+            foreground: 'hsl(213, 32%, 12%)',
+            card: { DEFAULT: 'hsl(0, 0%, 100%)', foreground: 'hsl(213, 32%, 12%)' },
+            primary: { DEFAULT: 'hsl(213, 80%, 18%)', foreground: 'hsl(210, 20%, 98%)' },
+            muted: { DEFAULT: 'hsl(210, 16%, 93%)', foreground: 'hsl(213, 10%, 46%)' },
+            accent: { DEFAULT: 'hsl(211, 100%, 50%)', foreground: 'hsl(0, 0%, 100%)' },
+            border: 'hsl(214, 20%, 88%)',
+          },
+          borderRadius: { lg: '0.625rem', xl: '0.875rem', '2xl': '1rem' },
+        },
+      },
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    *, *::before, *::after { border-color: hsl(214, 20%, 88%); }
+    .disclaimer-body h3 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: hsl(213, 32%, 12%); }
+    .disclaimer-body p, .disclaimer-body li { font-size: 0.875rem; line-height: 1.75; color: hsl(213, 10%, 36%); }
+    .disclaimer-body ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+    .disclaimer-body strong { color: hsl(213, 32%, 12%); }
+    .disclaimer-body .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.375rem; margin: 1rem 0; }
+  </style>
+</head>
+<body class="font-sans antialiased bg-background text-foreground">
+
+  <!-- Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <a href="/" class="flex items-center gap-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <span class="text-sm font-bold text-primary-foreground tracking-tight">M</span>
+        </div>
+        <span class="text-lg font-bold tracking-tight text-foreground">Milestone</span>
+      </a>
+      <a href="/" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">← 返回主頁</a>
+    </div>
+  </header>
+
+  <main class="pt-20">
+
+    <!-- Hero -->
+    <section class="py-20 bg-primary text-primary-foreground">
+      <div class="mx-auto max-w-4xl px-6 text-center">
+        <div class="mb-6 text-7xl">🎤</div>
+        <h1 class="mb-4 text-4xl font-bold tracking-tight md:text-5xl">KaraQueue</h1>
+        <p class="mb-3 text-xl text-primary-foreground/80">本地 WiFi KTV 點歌系統</p>
+        <p class="mb-10 text-base leading-relaxed text-primary-foreground/65 max-w-2xl mx-auto">免費開源工具。手機掃 QR 即可點歌，電視大屏播放，AI 自動建立歌手歌庫，無需月費，自己架設。</p>
+        <div class="flex flex-col gap-4 sm:flex-row justify-center">
+          <a href="https://github.com/mileslor/karaqueue" target="_blank" rel="noopener"
+             class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/20">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            GitHub 原始碼
+          </a>
+          <a href="https://github.com/mileslor/karaqueue/releases/latest" target="_blank" rel="noopener"
+             class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-base font-medium text-white transition-colors hover:bg-accent/90">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            免費下載
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-20 bg-background">
+      <div class="mx-auto max-w-5xl px-6">
+        <div class="mb-12 text-center">
+          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">功能特點</p>
+          <h2 class="text-3xl font-bold tracking-tight md:text-4xl">簡單架設，即刻開唱</h2>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">📱</div>
+            <h3 class="mb-2 font-semibold">手機掃碼點歌</h3>
+            <p class="text-sm text-muted-foreground">手機掃 QR Code 即可加入點歌，無需安裝任何 App，支援多人同時使用。</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">🤖</div>
+            <h3 class="mb-2 font-semibold">AI 自動建立歌庫</h3>
+            <p class="text-sm text-muted-foreground">播放 2 分鐘後 AI 自動分析歌手、語言及年代，建立可瀏覽的本地歌庫（需 AI API Key）。</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">📺</div>
+            <h3 class="mb-2 font-semibold">大屏電視播放</h3>
+            <p class="text-sm text-muted-foreground">電視畫面支援 Android TV APK，透過本地 WiFi 實現大屏播放，音質畫質由 YouTube 保證。</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">🔒</div>
+            <h3 class="mb-2 font-semibold">資料完全私有</h3>
+            <p class="text-sm text-muted-foreground">Node.js 本地伺服器，所有歌單資料只存在您自己的設備，不上傳任何資訊。</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">🎵</div>
+            <h3 class="mb-2 font-semibold">完整播放控制</h3>
+            <p class="text-sm text-muted-foreground">支援插播、調音量、上下首、重播，所有操作即時同步到電視。</p>
+          </div>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">💻</div>
+            <h3 class="mb-2 font-semibold">跨平台支援</h3>
+            <p class="text-sm text-muted-foreground">支援 Mac / Windows / Linux，只需安裝 Node.js 即可運行，無需其他依賴。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Disclaimer -->
+    <section class="py-20 bg-muted" id="disclaimer">
+      <div class="mx-auto max-w-4xl px-6">
+        <div class="mb-10 text-center">
+          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">法律聲明</p>
+          <h2 class="text-3xl font-bold tracking-tight">免責聲明 / Disclaimer</h2>
+          <p class="mt-3 text-sm text-muted-foreground">最後更新：2025 年 5 月 ／ Last Updated: May 2025</p>
+        </div>
+
+        <!-- Chinese -->
+        <div class="rounded-2xl border border-border bg-card p-8 mb-8 disclaimer-body">
+          <h2 class="text-xl font-bold mb-6 pb-4 border-b border-border">繁體中文版</h2>
+
+          <p>感謝您使用 KaraQueue。本軟件為由 Milestone Technology（下稱「本公司」）開發及發布的開源免費工具。使用本軟件即表示您同意接受本免責聲明的全部條款。</p>
+
+          <h3>一、軟件性質說明</h3>
+          <p>KaraQueue 是一款本地 WiFi KTV 點歌系統，透過 YouTube 官方 IFrame Player API 播放影片。所有影片均直接從 YouTube CDN 串流播放。本軟件<strong>不會下載、儲存、緩存、複製或轉發</strong>任何影片內容至第三方。</p>
+
+          <h3>二、YouTube 服務條款合規</h3>
+          <p>本軟件僅使用 YouTube 官方 IFrame Player API。用家在使用本系統播放任何 YouTube 影片前，<strong>須自行確保</strong>該影片的使用方式符合 YouTube 服務條款及相關平台政策。</p>
+
+          <h3>三、版權聲明</h3>
+          <p>本軟件不持有任何影片內容的版權。所有透過 KaraQueue 播放的 YouTube 影片，其版權及相關知識產權均歸各影片原創者及／或其權利持有人所有。本軟件不對任何影片內容主張任何權利，亦不授權任何版權使用。</p>
+
+          <h3>四、公開表演及商業場所授權警告</h3>
+          <div class="warning">
+            <strong>重要：</strong>於公共場所、商業場所或任何涉及公眾表演的環境中使用本軟件播放音樂或影片，可能須持有相應版權授權許可。
+          </div>
+          <p><strong>香港特別行政區用家注意：</strong></p>
+          <ul>
+            <li>於公共或商業場所播放受版權保護的音樂作品，可能需要向 <strong>CASH（香港作曲家及作詞家協會）</strong>取得公開表演許可。</li>
+            <li>部分表演內容可能需要向 <strong>HKGO（香港演藝人協會）</strong>或其他相關機構申請授權。</li>
+            <li>用家須自行負責向相關版權機構查詢及申請所需授權。本公司不就任何授權事宜提供法律意見，亦不對任何未經授權使用版權作品而引致的法律責任負責。</li>
+          </ul>
+          <p><strong>其他地區用家：</strong>各地區對公開表演及版權內容使用有不同的法律規定，用家須在使用本軟件前，了解並遵守當地適用的法律法規，包括但不限於版權法、表演權法及相關知識產權法規。</p>
+
+          <h3>五、免保證聲明（按「現況」提供）</h3>
+          <p>本軟件以<strong>「現況」（AS IS）及「按可用性」（AS AVAILABLE）</strong>為基礎提供。本公司明確排除一切明示或隱含的保證，包括但不限於對適銷性、特定用途適用性、非侵權性的默示保證。本公司不保證：</p>
+          <ul>
+            <li>本軟件將持續正常運作、不含錯誤或不會中斷；</li>
+            <li>本軟件適用於任何特定用途或符合您的特定要求；</li>
+            <li>使用本軟件不會侵犯任何第三方的知識產權或其他權利；</li>
+            <li>本軟件或任何相關服務的安全性或不含任何惡意成分。</li>
+          </ul>
+
+          <h3>六、責任限制</h3>
+          <p>在法律允許的最大範圍內，<strong>Milestone Technology、其董事、員工、貢獻者及關聯方</strong>明確排除因以下情況引致的任何直接、間接、附帶、特殊、衍生性或懲罰性賠償責任：</p>
+          <ul>
+            <li>本軟件的使用或無法使用；</li>
+            <li>任何透過本軟件播放的影片內容；</li>
+            <li>任何因版權侵權、知識產權侵權或其他法律爭議而引致的損失；</li>
+            <li>任何因用家違反本免責聲明或適用法律而引致的後果；</li>
+            <li>任何第三方就本軟件提出的索償或主張。</li>
+          </ul>
+          <p>即使本公司已被告知可能發生此類損失，上述排除仍將適用。</p>
+
+          <h3>七、用家責任</h3>
+          <p>使用本軟件即表示您確認並同意，您須<strong>自行負責</strong>確保您的使用方式符合：</p>
+          <ul>
+            <li>您所在司法管轄區的所有適用法律、法規及規章；</li>
+            <li>YouTube 服務條款及所有相關平台政策；</li>
+            <li>任何適用的版權法及表演權法規。</li>
+          </ul>
+          <p>您同意僅將本軟件用於合法目的，並自行承擔使用本軟件的所有風險。</p>
+
+          <h3>八、與 YouTube／Google 無關聯聲明</h3>
+          <p>KaraQueue 為獨立的開源軟件專案，<strong>與 YouTube, LLC、Google LLC 或其任何附屬公司沒有任何附屬關係、贊助關係或認可關係</strong>。YouTube 及 Google 的名稱、商標及相關知識產權均為其各自所有人的財產。YouTube 保留根據其服務條款及開發者政策，對 IFrame Player API 使用方式進行規範及限制的權利。</p>
+
+          <h3>九、適用法律</h3>
+          <p>本免責聲明受<strong>香港特別行政區法律</strong>管轄。如因本軟件或本免責聲明引起的任何爭議，雙方同意接受香港特別行政區法院的專屬管轄權。</p>
+
+          <h3>十、聯絡方式</h3>
+          <p>如對本免責聲明有任何疑問，請透過 <strong>hkmilestone.com</strong> 與 Milestone Technology 聯絡。</p>
+        </div>
+
+        <!-- English -->
+        <div class="rounded-2xl border border-border bg-card p-8 disclaimer-body">
+          <h2 class="text-xl font-bold mb-6 pb-4 border-b border-border">English Version</h2>
+
+          <p>Thank you for using KaraQueue. This software is an open-source free tool developed and published by Milestone Technology (hereinafter "the Company"). By using this software, you agree to be bound by all terms of this Disclaimer.</p>
+
+          <h3>1. Software Description</h3>
+          <p>KaraQueue is a local WiFi KTV song request system that plays videos using YouTube's official IFrame Player API, with all videos streamed directly from YouTube's CDN. This software does <strong>not download, store, cache, copy, or forward</strong> any video content to any third party.</p>
+
+          <h3>2. YouTube Terms of Service Compliance</h3>
+          <p>This software exclusively uses YouTube's official IFrame Player API. <strong>Users are solely responsible</strong> for ensuring that their use of any YouTube video played through this system complies with YouTube's Terms of Service and related platform policies.</p>
+
+          <h3>3. Copyright Statement</h3>
+          <p>This software does not hold any copyright to any video content. All YouTube videos played through KaraQueue are owned by their respective creators and/or rights holders. This software makes no claims over any video content and grants no copyright licenses.</p>
+
+          <h3>4. Public Performance and Commercial Venue Warning</h3>
+          <div class="warning">
+            <strong>IMPORTANT:</strong> Playing music or video content through this software in public places, commercial establishments, or any environment involving public performance may require appropriate licensing permits.
+          </div>
+          <p><strong>Users in the Hong Kong SAR should note:</strong></p>
+          <ul>
+            <li>Playing copyrighted musical works in public or commercial venues may require a public performance license from <strong>CASH (Composers and Authors Society of Hong Kong)</strong>.</li>
+            <li>Certain performance content may require additional licenses from <strong>HKGO (Hong Kong General Performing Rights Association)</strong> or other relevant organizations.</li>
+            <li>Users are solely responsible for consulting with and applying to relevant copyright organizations for necessary permits. The Company provides no legal advice regarding licensing matters and assumes no responsibility for any legal liability arising from unauthorized use of copyrighted works.</li>
+          </ul>
+          <p><strong>Users in other regions</strong> must understand and comply with all applicable local laws and regulations, including but not limited to copyright law, performance rights law, and related intellectual property regulations, before using this software.</p>
+
+          <h3>5. No Warranty (Provided "As Is")</h3>
+          <p>This software is provided on an <strong>"AS IS" and "AS AVAILABLE"</strong> basis. The Company expressly disclaims all warranties, express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement. The Company does not warrant that:</p>
+          <ul>
+            <li>The software will operate continuously, be error-free, or be uninterrupted;</li>
+            <li>The software is suitable for any particular purpose or meets your specific requirements;</li>
+            <li>Use of the software will not infringe any third-party intellectual property rights;</li>
+            <li>The software or related services are secure or free from malicious components.</li>
+          </ul>
+
+          <h3>6. Limitation of Liability</h3>
+          <p>To the maximum extent permitted by law, <strong>Milestone Technology, its directors, employees, contributors, and affiliates</strong> expressly exclude all liability for any direct, indirect, incidental, special, consequential, or punitive damages arising from:</p>
+          <ul>
+            <li>The use of or inability to use this software;</li>
+            <li>Any video content played through this software;</li>
+            <li>Any losses arising from copyright infringement, intellectual property infringement, or other legal disputes;</li>
+            <li>Any consequences arising from a user's violation of this Disclaimer or applicable laws;</li>
+            <li>Any claims or actions by third parties regarding this software.</li>
+          </ul>
+          <p>These exclusions apply even if the Company has been advised of the possibility of such losses.</p>
+
+          <h3>7. User Responsibility</h3>
+          <p>By using this software, you confirm and agree that you are <strong>solely responsible</strong> for ensuring your use complies with:</p>
+          <ul>
+            <li>All applicable laws, regulations, and rules in your jurisdiction;</li>
+            <li>YouTube's Terms of Service and all related platform policies;</li>
+            <li>Any applicable copyright law and performance rights regulations.</li>
+          </ul>
+          <p>You agree to use this software only for lawful purposes and assume all risks associated with its use.</p>
+
+          <h3>8. No Affiliation with YouTube / Google</h3>
+          <p>KaraQueue is an independent open-source software project with <strong>no affiliation, sponsorship, or endorsement relationship with YouTube, LLC, Google LLC, or any of their affiliates</strong>. YouTube and Google names, trademarks, and related intellectual property are the property of their respective owners. YouTube reserves the right to regulate and restrict the use of the IFrame Player API in accordance with its Terms of Service and Developer Policies.</p>
+
+          <h3>9. Governing Law</h3>
+          <p>This Disclaimer is governed by the laws of the <strong>Hong Kong Special Administrative Region</strong>. Any disputes arising from this software or this Disclaimer shall be subject to the exclusive jurisdiction of the courts of the Hong Kong SAR.</p>
+
+          <h3>10. Severability</h3>
+          <p>If any provision of this Disclaimer is found to be invalid, illegal, or unenforceable, that provision shall be limited or eliminated to the minimum extent necessary, and the remaining provisions shall continue in full force and effect.</p>
+
+          <h3>11. Contact</h3>
+          <p>If you have any questions regarding this Disclaimer, please contact Milestone Technology via <strong>hkmilestone.com</strong>.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border bg-primary py-10 text-primary-foreground/60">
+    <div class="mx-auto max-w-7xl px-6 text-center text-sm">
+      <p>© 2025 Milestone Technology. KaraQueue is open-source software released under the MIT License.</p>
+      <p class="mt-1"><a href="/" class="hover:text-primary-foreground transition-colors">hkmilestone.com</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

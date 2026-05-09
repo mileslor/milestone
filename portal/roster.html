@@ -52,6 +52,11 @@
   .badge-do2 { background: #30d15822; color: #1a7a35; }
   .badge-pending { background: #ff9f0a22; color: #b06000; }
   .badge-session { background: #007aff22; color: #0055cc; }
+  .entry-night { background: #1c2340; }
+  .entry-night .entry-time { color: #8e9bbf; }
+  .entry-night .entry-name { color: #e8eaf6; }
+  .badge-session-night { background: #3d4f8a; color: #b0bcf0; }
+
   .leave-row { padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
   .leave-type { background: #af52de22; color: #6a3194; font-size: 12px; font-weight: 700;
                 padding: 3px 8px; border-radius: 6px; }
@@ -200,9 +205,10 @@ function renderRoster(data) {
         : e.pic_role === 2 ? '<span class="badge badge-do2">DO2</span>' : '';
       const pendingBadge = e.header_status === 'pending_approval'
         ? '<span class="badge badge-pending">待批准</span>' : '';
-      const sessionBadge = `<span class="badge badge-session">${SESSION_LABEL[e.session] || e.session}</span>`;
+      const isNight = e.session === 'N';
+      const sessionBadge = `<span class="badge ${isNight ? 'badge-session-night' : 'badge-session'}">${SESSION_LABEL[e.session] || e.session}</span>`;
 
-      html += `<div class="entry">
+      html += `<div class="entry${isNight ? ' entry-night' : ''}">
         <div class="entry-time">${e.start_time} – ${e.end_time}（${e.duration_hours}小時）</div>
         <div class="entry-name">${e.activity_name}</div>
         <div class="entry-meta">${sessionBadge}${picBadge}${pendingBadge}</div>

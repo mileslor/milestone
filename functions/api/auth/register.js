@@ -32,7 +32,7 @@ export async function onRequestPost({ request, env }) {
          expires_at = NULL`
     ).bind(device_uuid, username.trim(), device_label || null, registered_at).run();
 
-    return json({ ok: true, status: 'pending', message: '登記成功，請返回中心讓管理員批准此裝置。' });
+    return json({ ok: true, status: 'pending', message: '登記成功，請返回中心登入系統以進行批准程序。' });
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
   }

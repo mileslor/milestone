@@ -69,12 +69,13 @@
 
       <!-- Desktop Nav -->
       <nav class="hidden items-center gap-8 md:flex" aria-label="Main navigation">
-        <a href="#services" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">服務</a>
-        <a href="#about" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">關於我們</a>
-        <a href="#why-us" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
-        <a href="#projects" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">項目案例</a>
-        <a href="#contact" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
-        <a href="#contact" class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
+        <a href="#services" data-i18n="nav_services" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">服務</a>
+        <a href="#about" data-i18n="nav_about" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">關於我們</a>
+        <a href="#why-us" data-i18n="nav_whyus" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
+        <a href="#projects" data-i18n="nav_projects" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">項目案例</a>
+        <a href="#contact" data-i18n="nav_contact" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
+        <button id="langToggle" onclick="toggleLang()" class="lang-toggle-btn px-3 py-1 rounded border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">EN</button>
+        <a href="#contact" data-i18n="nav_consultation" class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
       </nav>
 
       <!-- Mobile Toggle -->
@@ -87,12 +88,13 @@
     <!-- Mobile Nav -->
     <nav id="mobile-nav" class="hidden border-t border-border bg-white px-6 py-4 md:hidden" aria-label="Mobile navigation">
       <div class="flex flex-col gap-4">
-        <a href="#services" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">服務</a>
-        <a href="#about" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">關於我們</a>
-        <a href="#why-us" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
-        <a href="#projects" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">項目案例</a>
-        <a href="#contact" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
-        <a href="#contact" class="mobile-link inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
+        <a href="#services" data-i18n="nav_services" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">服務</a>
+        <a href="#about" data-i18n="nav_about" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">關於我們</a>
+        <a href="#why-us" data-i18n="nav_whyus" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
+        <a href="#projects" data-i18n="nav_projects" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">項目案例</a>
+        <a href="#contact" data-i18n="nav_contact" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
+        <a href="#contact" data-i18n="nav_consultation" class="mobile-link inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
+        <button id="langToggleMobile" onclick="toggleLang()" class="lang-toggle-btn w-full rounded border border-border py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">EN / 中</button>
       </div>
     </nav>
   </header>
@@ -108,14 +110,14 @@
       <div class="relative z-10 mx-auto max-w-7xl px-6 py-32">
         <div class="max-w-2xl">
           <p class="mb-4 text-sm font-medium uppercase tracking-widest text-accent">Milestone Technology</p>
-          <h1 class="mb-6 text-4xl font-bold leading-tight tracking-tight text-primary-foreground md:text-5xl lg:text-6xl" style="text-wrap:balance">高效、可靠的技術方案伙伴</h1>
-          <p class="mb-10 text-lg leading-relaxed text-primary-foreground/80 md:text-xl">我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。</p>
+          <h1 data-i18n="hero_title" class="mb-6 text-4xl font-bold leading-tight tracking-tight text-primary-foreground md:text-5xl lg:text-6xl" style="text-wrap:balance">高效、可靠的技術方案伙伴</h1>
+          <p data-i18n="hero_subtitle" class="mb-10 text-lg leading-relaxed text-primary-foreground/80 md:text-xl">我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。</p>
           <div class="flex flex-col gap-4 sm:flex-row">
             <a href="#services" class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-base font-medium text-accent-foreground transition-colors hover:bg-accent/90">
-              了解我們的服務
+              <span data-i18n="hero_btn1">了解我們的服務</span>
               <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </a>
-            <a href="#contact" class="inline-flex items-center justify-center rounded-lg border border-primary-foreground/30 bg-transparent px-6 py-3 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/10">聯絡我們</a>
+            <a href="#contact" data-i18n="hero_btn2" class="inline-flex items-center justify-center rounded-lg border border-primary-foreground/30 bg-transparent px-6 py-3 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/10">聯絡我們</a>
           </div>
         </div>
       </div>
@@ -125,64 +127,64 @@
     <section id="services" class="py-24 bg-background">
       <div class="mx-auto max-w-7xl px-6">
         <div class="mb-16 max-w-2xl">
-          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">我們的服務</p>
-          <h2 class="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">全方位技術解決方案</h2>
-          <p class="text-lg leading-relaxed text-muted-foreground">從日常技術支援到客製化開發，我們的專業團隊為您的業務提供端到端的技術服務。</p>
+          <p data-i18n="services_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">我們的服務</p>
+          <h2 data-i18n="services_title" class="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">全方位技術解決方案</h2>
+          <p data-i18n="services_desc" class="text-lg leading-relaxed text-muted-foreground">從日常技術支援到客製化開發，我們的專業團隊為您的業務提供端到端的技術服務。</p>
         </div>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <!-- Service 1: 技術支援 -->
+          <!-- Service 1 -->
           <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z"/></svg>
             </div>
-            <h3 class="mb-3 text-lg font-semibold text-card-foreground">技術支援</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">快速響應的遙距及現場支援，解決您日常遇到的各種技術難題，確保業務營運不受阻礙。</p>
+            <h3 data-i18n="s1_title" class="mb-3 text-lg font-semibold text-card-foreground">技術支援</h3>
+            <p data-i18n="s1_desc" class="text-sm leading-relaxed text-muted-foreground">快速響應的遙距及現場支援，解決您日常遇到的各種技術難題，確保業務營運不受阻礙。</p>
           </div>
 
-          <!-- Service 2: 系統管理 -->
+          <!-- Service 2 -->
           <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </div>
-            <h3 class="mb-3 text-lg font-semibold text-card-foreground">系統管理</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">專業的伺服器、網絡及基礎設施管理服務，保障您的 IT 系統穩定運行。</p>
+            <h3 data-i18n="s2_title" class="mb-3 text-lg font-semibold text-card-foreground">系統管理</h3>
+            <p data-i18n="s2_desc" class="text-sm leading-relaxed text-muted-foreground">專業的伺服器、網絡及基礎設施管理服務，保障您的 IT 系統穩定運行。</p>
           </div>
 
-          <!-- Service 3: 客製化軟件開發 -->
+          <!-- Service 3 -->
           <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
             </div>
-            <h3 class="mb-3 text-lg font-semibold text-card-foreground">客製化軟件開發</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">根據您的業務需求，度身訂造高效的軟件解決方案，提升營運效率。</p>
+            <h3 data-i18n="s3_title" class="mb-3 text-lg font-semibold text-card-foreground">客製化軟件開發</h3>
+            <p data-i18n="s3_desc" class="text-sm leading-relaxed text-muted-foreground">根據您的業務需求，度身訂造高效的軟件解決方案，提升營運效率。</p>
           </div>
 
-          <!-- Service 4: 雲端方案 -->
+          <!-- Service 4 -->
           <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z"/></svg>
             </div>
-            <h3 class="mb-3 text-lg font-semibold text-card-foreground">雲端方案</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">協助企業遷移至雲端平台，提供雲端架構設計及持續優化服務。</p>
+            <h3 data-i18n="s4_title" class="mb-3 text-lg font-semibold text-card-foreground">雲端方案</h3>
+            <p data-i18n="s4_desc" class="text-sm leading-relaxed text-muted-foreground">協助企業遷移至雲端平台，提供雲端架構設計及持續優化服務。</p>
           </div>
 
-          <!-- Service 5: 資訊安全 -->
+          <!-- Service 5 -->
           <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
             </div>
-            <h3 class="mb-3 text-lg font-semibold text-card-foreground">資訊安全</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">全面的網絡安全評估及防護方案，保護您的企業數據資產。</p>
+            <h3 data-i18n="s5_title" class="mb-3 text-lg font-semibold text-card-foreground">資訊安全</h3>
+            <p data-i18n="s5_desc" class="text-sm leading-relaxed text-muted-foreground">全面的網絡安全評估及防護方案，保護您的企業數據資產。</p>
           </div>
 
-          <!-- Service 6: 技術講座 -->
+          <!-- Service 6 -->
           <div class="group rounded-xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/30">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
             </div>
-            <h3 class="mb-3 text-lg font-semibold text-card-foreground">技術講座</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">分享行業知識與最新技術趨勢，提升團隊的專業技能與競爭力。</p>
+            <h3 data-i18n="s6_title" class="mb-3 text-lg font-semibold text-card-foreground">技術講座</h3>
+            <p data-i18n="s6_desc" class="text-sm leading-relaxed text-muted-foreground">分享行業知識與最新技術趨勢，提升團隊的專業技能與競爭力。</p>
           </div>
         </div>
       </div>
@@ -196,22 +198,22 @@
             <img src="images/about.jpg" alt="Milestone Technology 團隊協作" class="h-full w-full object-cover" />
           </div>
           <div>
-            <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">關於我們</p>
-            <h2 class="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">值得信賴的技術伙伴</h2>
-            <p class="mb-6 text-base leading-relaxed text-muted-foreground">Milestone Technology 紮根香港，專注為中小企業及機構提供高品質的技術服務。我們深明企業在數碼轉型過程中面對的挑戰，因此致力以務實、高效的方式，為客戶解決各種技術難題。</p>
-            <p class="mb-10 text-base leading-relaxed text-muted-foreground">憑藉逾二十年的實戰經驗，我們深明不同規模機構在日常運作中面對的實際挑戰。無論是系統整合、流程改善，還是度身訂造的軟件方案，我們都以務實、直接的方式協助客戶解決問題。</p>
+            <p data-i18n="about_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">關於我們</p>
+            <h2 data-i18n="about_title" class="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">值得信賴的技術伙伴</h2>
+            <p data-i18n="about_p1" class="mb-6 text-base leading-relaxed text-muted-foreground">Milestone Technology 紮根香港，專注為中小企業及機構提供高品質的技術服務。我們深明企業在數碼轉型過程中面對的挑戰，因此致力以務實、高效的方式，為客戶解決各種技術難題。</p>
+            <p data-i18n="about_p2" class="mb-10 text-base leading-relaxed text-muted-foreground">憑藉逾二十年的實戰經驗，我們深明不同規模機構在日常運作中面對的實際挑戰。無論是系統整合、流程改善，還是度身訂造的軟件方案，我們都以務實、直接的方式協助客戶解決問題。</p>
             <div class="grid grid-cols-3 gap-6">
               <div class="text-center">
                 <p class="text-2xl font-bold text-accent md:text-3xl">20+</p>
-                <p class="mt-1 text-xs font-medium text-muted-foreground">年行業經驗</p>
+                <p data-i18n="stat1" class="mt-1 text-xs font-medium text-muted-foreground">年行業經驗</p>
               </div>
               <div class="text-center">
                 <p class="text-2xl font-bold text-accent md:text-3xl">99.9%</p>
-                <p class="mt-1 text-xs font-medium text-muted-foreground">系統穩定率</p>
+                <p data-i18n="stat2" class="mt-1 text-xs font-medium text-muted-foreground">系統穩定率</p>
               </div>
               <div class="text-center">
-                <p class="text-2xl font-bold text-accent md:text-3xl">即日</p>
-                <p class="mt-1 text-xs font-medium text-muted-foreground">查詢回覆目標</p>
+                <p data-i18n="stat3_value" class="text-2xl font-bold text-accent md:text-3xl">即日</p>
+                <p data-i18n="stat3" class="mt-1 text-xs font-medium text-muted-foreground">查詢回覆目標</p>
               </div>
             </div>
           </div>
@@ -223,9 +225,9 @@
     <section id="why-us" class="py-24 bg-primary">
       <div class="mx-auto max-w-7xl px-6">
         <div class="mb-16 max-w-2xl">
-          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">為何選擇我們</p>
-          <h2 class="mb-4 text-3xl font-bold tracking-tight text-primary-foreground md:text-4xl" style="text-wrap:balance">您的成功，就是我們的使命</h2>
-          <p class="text-lg leading-relaxed text-primary-foreground/70">我們以客戶為中心，用專業和誠意贏得信任。</p>
+          <p data-i18n="whyus_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">為何選擇我們</p>
+          <h2 data-i18n="whyus_title" class="mb-4 text-3xl font-bold tracking-tight text-primary-foreground md:text-4xl" style="text-wrap:balance">您的成功，就是我們的使命</h2>
+          <p data-i18n="whyus_subtitle" class="text-lg leading-relaxed text-primary-foreground/70">我們以客戶為中心，用專業和誠意贏得信任。</p>
         </div>
 
         <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -235,8 +237,8 @@
               <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-              <h3 class="mb-2 text-base font-semibold text-primary-foreground">快速響應</h3>
-              <p class="text-sm leading-relaxed text-primary-foreground/70">積極跟進每一個支援請求，以即日回覆為目標，確保您的問題不被忽視。</p>
+              <h3 data-i18n="r1_title" class="mb-2 text-base font-semibold text-primary-foreground">快速響應</h3>
+              <p data-i18n="r1_desc" class="text-sm leading-relaxed text-primary-foreground/70">積極跟進每一個支援請求，以即日回覆為目標，確保您的問題不被忽視。</p>
             </div>
           </div>
 
@@ -246,8 +248,8 @@
               <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-              <h3 class="mb-2 text-base font-semibold text-primary-foreground">度身訂造</h3>
-              <p class="text-sm leading-relaxed text-primary-foreground/70">每個企業都是獨特的。我們不提供一刀切的方案，而是根據您的實際需求量身設計。</p>
+              <h3 data-i18n="r2_title" class="mb-2 text-base font-semibold text-primary-foreground">度身訂造</h3>
+              <p data-i18n="r2_desc" class="text-sm leading-relaxed text-primary-foreground/70">每個企業都是獨特的。我們不提供一刀切的方案，而是根據您的實際需求量身設計。</p>
             </div>
           </div>
 
@@ -257,8 +259,8 @@
               <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-              <h3 class="mb-2 text-base font-semibold text-primary-foreground">透明收費</h3>
-              <p class="text-sm leading-relaxed text-primary-foreground/70">清晰的服務範圍和收費標準，沒有隱藏費用，讓您安心預算。</p>
+              <h3 data-i18n="r3_title" class="mb-2 text-base font-semibold text-primary-foreground">透明收費</h3>
+              <p data-i18n="r3_desc" class="text-sm leading-relaxed text-primary-foreground/70">清晰的服務範圍和收費標準，沒有隱藏費用，讓您安心預算。</p>
             </div>
           </div>
 
@@ -268,8 +270,8 @@
               <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-              <h3 class="mb-2 text-base font-semibold text-primary-foreground">持續支援</h3>
-              <p class="text-sm leading-relaxed text-primary-foreground/70">我們不只是完成項目就離開。長期的技術支援和維護，是我們服務承諾的一部分。</p>
+              <h3 data-i18n="r4_title" class="mb-2 text-base font-semibold text-primary-foreground">持續支援</h3>
+              <p data-i18n="r4_desc" class="text-sm leading-relaxed text-primary-foreground/70">我們不只是完成項目就離開。長期的技術支援和維護，是我們服務承諾的一部分。</p>
             </div>
           </div>
 
@@ -279,8 +281,8 @@
               <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-              <h3 class="mb-2 text-base font-semibold text-primary-foreground">保密可靠</h3>
-              <p class="text-sm leading-relaxed text-primary-foreground/70">嚴格保護客戶資料及業務機密，所有項目均依保密協議處理，讓您放心委託。</p>
+              <h3 data-i18n="r5_title" class="mb-2 text-base font-semibold text-primary-foreground">保密可靠</h3>
+              <p data-i18n="r5_desc" class="text-sm leading-relaxed text-primary-foreground/70">嚴格保護客戶資料及業務機密，所有項目均依保密協議處理，讓您放心委託。</p>
             </div>
           </div>
 
@@ -290,8 +292,8 @@
               <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-              <h3 class="mb-2 text-base font-semibold text-primary-foreground">本地團隊</h3>
-              <p class="text-sm leading-relaxed text-primary-foreground/70">紮根香港的本地技術團隊，了解本地市場需求，溝通無障礙。</p>
+              <h3 data-i18n="r6_title" class="mb-2 text-base font-semibold text-primary-foreground">本地團隊</h3>
+              <p data-i18n="r6_desc" class="text-sm leading-relaxed text-primary-foreground/70">紮根香港的本地技術團隊，了解本地市場需求，溝通無障礙。</p>
             </div>
           </div>
         </div>
@@ -302,107 +304,107 @@
     <section id="projects" class="py-24 bg-secondary">
       <div class="mx-auto max-w-7xl px-6">
         <div class="mb-16 max-w-2xl">
-          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">項目案例</p>
-          <h2 class="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">部分完成項目</h2>
-          <p class="text-lg leading-relaxed text-muted-foreground">以下為近期完成的客製化開發項目及自家開源工具。客戶案例按要求不披露詳細資料。</p>
+          <p data-i18n="projects_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">項目案例</p>
+          <h2 data-i18n="projects_title" class="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">部分完成項目</h2>
+          <p data-i18n="projects_desc" class="text-lg leading-relaxed text-muted-foreground">以下為近期完成的客製化開發項目及自家開源工具。客戶案例按要求不披露詳細資料。</p>
         </div>
 
         <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 
-          <!-- Project 1: 會員及管理系統 -->
+          <!-- Project 1 -->
           <div class="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
             </div>
             <div class="mb-3 flex items-center gap-2">
-              <span class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">客製化開發</span>
-              <span class="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">NGO</span>
+              <span data-i18n="p1_tag1" class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">客製化開發</span>
+              <span data-i18n="p1_tag2" class="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">NGO</span>
             </div>
-            <h3 class="mb-3 text-xl font-semibold text-card-foreground">會員及管理系統</h3>
-            <p class="mb-5 text-sm leading-relaxed text-muted-foreground">為機構度身開發會員管理系統，處理會員資料、會籍狀態及相關行政記錄，提升日常管理效率，減少人工處理時間。</p>
+            <h3 data-i18n="p1_title" class="mb-3 text-xl font-semibold text-card-foreground">會員及管理系統</h3>
+            <p data-i18n="p1_desc" class="mb-5 text-sm leading-relaxed text-muted-foreground">為機構度身開發會員管理系統，處理會員資料、會籍狀態及相關行政記錄，提升日常管理效率，減少人工處理時間。</p>
             <ul class="flex flex-col gap-2">
               <li class="flex items-center gap-2 text-sm text-muted-foreground">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                會員資料及會籍管理
+                <span data-i18n="p1_f1">會員資料及會籍管理</span>
               </li>
               <li class="flex items-center gap-2 text-sm text-muted-foreground">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                行政記錄及查詢功能
+                <span data-i18n="p1_f2">行政記錄及查詢功能</span>
               </li>
               <li class="flex items-center gap-2 text-sm text-muted-foreground">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                管理員後台操作介面
+                <span data-i18n="p1_f3">管理員後台操作介面</span>
               </li>
             </ul>
           </div>
 
-          <!-- Project 2: 飛行員記錄工具 -->
+          <!-- Project 2 -->
           <div class="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
               <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
             </div>
             <div class="mb-3 flex items-center gap-2">
-              <span class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">客製化開發</span>
-              <span class="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">航空專業</span>
+              <span data-i18n="p2_tag1" class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">客製化開發</span>
+              <span data-i18n="p2_tag2" class="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">航空專業</span>
             </div>
-            <h3 class="mb-3 text-xl font-semibold text-card-foreground">飛行員飛行記錄系統</h3>
-            <p class="mb-5 text-sm leading-relaxed text-muted-foreground">為飛行員開發的數碼飛行日誌工具，取代傳統紙本記錄。支援飛行時數累計、航段記錄及資格追蹤，方便日常查閱及申報，符合業界標準格式。</p>
+            <h3 data-i18n="p2_title" class="mb-3 text-xl font-semibold text-card-foreground">飛行員飛行記錄系統</h3>
+            <p data-i18n="p2_desc" class="mb-5 text-sm leading-relaxed text-muted-foreground">為飛行員開發的數碼飛行日誌工具，取代傳統紙本記錄。支援飛行時數累計、航段記錄及資格追蹤，方便日常查閱及申報，符合業界標準格式。</p>
             <ul class="mb-6 flex flex-col gap-2">
               <li class="flex items-center gap-2 text-sm text-muted-foreground">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                飛行時數及航段記錄
+                <span data-i18n="p2_f1">飛行時數及航段記錄</span>
               </li>
               <li class="flex items-center gap-2 text-sm text-muted-foreground">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                資格及執照有效期追蹤
+                <span data-i18n="p2_f2">資格及執照有效期追蹤</span>
               </li>
               <li class="flex items-center gap-2 text-sm text-muted-foreground">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                符合業界標準之報表輸出
+                <span data-i18n="p2_f3">符合業界標準之報表輸出</span>
               </li>
             </ul>
             <a href="https://pilot.hkmilestone.com/" target="_blank" rel="noopener"
                class="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">
-              前往查看
+              <span data-i18n="p2_btn">前往查看</span>
               <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
             </a>
           </div>
 
-          <!-- Project 3: KaraQueue open source -->
+          <!-- Project 3: KaraQueue -->
           <div class="rounded-2xl border border-border p-8 shadow-sm" style="background:#3d4451">
             <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl" style="background:rgba(255,255,255,0.1)">
               <span class="text-2xl">🎤</span>
             </div>
             <div class="mb-3 flex items-center gap-2">
-              <span class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">開源工具</span>
-              <span class="rounded-full px-3 py-1 text-xs font-medium" style="background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.6)">免費使用</span>
+              <span data-i18n="p3_tag1" class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">開源工具</span>
+              <span data-i18n="p3_tag2" class="rounded-full px-3 py-1 text-xs font-medium" style="background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.6)">免費使用</span>
             </div>
             <h3 class="mb-3 text-xl font-semibold text-white">KaraQueue</h3>
-            <p class="mb-5 text-sm leading-relaxed" style="color:rgba(255,255,255,0.65)">本地 WiFi YouTube KTV 點歌系統。手機掃 QR 即可點歌，電視同步播放，AI 自動建立歌手歌庫，無需月費，自己架設。</p>
+            <p data-i18n="p3_desc" class="mb-5 text-sm leading-relaxed" style="color:rgba(255,255,255,0.65)">本地 WiFi YouTube KTV 點歌系統。手機掃 QR 即可點歌，電視同步播放，AI 自動建立歌手歌庫，無需月費，自己架設。</p>
             <ul class="mb-6 flex flex-col gap-2">
               <li class="flex items-center gap-2 text-sm" style="color:rgba(255,255,255,0.65)">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                搜尋 YouTube ／ 貼連結 ／ 載入播放清單
+                <span data-i18n="p3_f1">搜尋 YouTube ／ 貼連結 ／ 載入播放清單</span>
               </li>
               <li class="flex items-center gap-2 text-sm" style="color:rgba(255,255,255,0.65)">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                AI 自動分類歌手、語言及年代（需 MiniMax API）
+                <span data-i18n="p3_f2">AI 自動分類歌手、語言及年代（需 MiniMax API）</span>
               </li>
               <li class="flex items-center gap-2 text-sm" style="color:rgba(255,255,255,0.65)">
                 <svg class="h-4 w-4 flex-shrink-0 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                支援 Mac / Windows / Linux
+                <span data-i18n="p3_f3">支援 Mac / Windows / Linux</span>
               </li>
             </ul>
             <div class="flex flex-wrap gap-3">
               <a href="https://github.com/mileslor/karaqueue" target="_blank" rel="noopener"
                  class="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-80" style="border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.08)">
                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-                原始碼
+                <span data-i18n="p3_btn1">原始碼</span>
               </a>
               <a href="https://github.com/mileslor/karaqueue/releases/latest" target="_blank" rel="noopener"
                  class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90" style="background:#2d323d">
                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                免費下載
+                <span data-i18n="p3_btn2">免費下載</span>
               </a>
               <a href="/karaqueue" class="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-80" style="border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.06)">
                 免責聲明 →
@@ -420,9 +422,9 @@
         <div class="grid gap-16 lg:grid-cols-2">
           <!-- Info -->
           <div>
-            <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">聯絡我們</p>
-            <h2 class="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">讓我們開始合作</h2>
-            <p class="mb-10 text-base leading-relaxed text-muted-foreground">無論您有任何技術需求或疑問，歡迎隨時與我們聯繫。我們的團隊會盡快回覆您。</p>
+            <p data-i18n="contact_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">聯絡我們</p>
+            <h2 data-i18n="contact_title" class="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="text-wrap:balance">讓我們開始合作</h2>
+            <p data-i18n="contact_desc" class="mb-10 text-base leading-relaxed text-muted-foreground">無論您有任何技術需求或疑問，歡迎隨時與我們聯繫。我們的團隊會盡快回覆您。</p>
 
             <div class="flex flex-col gap-6">
               <div class="flex items-start gap-4">
@@ -430,7 +432,7 @@
                   <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-foreground">電郵</p>
+                  <p data-i18n="email_label" class="text-sm font-semibold text-foreground">電郵</p>
                   <p class="text-sm text-muted-foreground">info@hkmilestone.com</p>
                 </div>
               </div>
@@ -439,7 +441,7 @@
                   <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-foreground">電話</p>
+                  <p data-i18n="phone_label" class="text-sm font-semibold text-foreground">電話</p>
                   <p class="text-sm text-muted-foreground">+852 6178 9563</p>
                 </div>
               </div>
@@ -448,7 +450,7 @@
 
           <!-- Contact Actions -->
           <div class="rounded-2xl border border-border bg-card p-8 shadow-sm flex flex-col justify-center gap-6">
-            <p class="text-sm leading-relaxed text-muted-foreground">選擇以下最方便的方式聯絡我們，我們將盡快回覆您的查詢。</p>
+            <p data-i18n="card_desc" class="text-sm leading-relaxed text-muted-foreground">選擇以下最方便的方式聯絡我們，我們將盡快回覆您的查詢。</p>
 
             <!-- WhatsApp -->
             <a href="https://wa.me/85261789563" target="_blank" rel="noopener noreferrer"
@@ -457,18 +459,18 @@
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
               </svg>
-              WhatsApp 即時查詢
+              <span data-i18n="whatsapp_btn">WhatsApp 即時查詢</span>
             </a>
 
             <!-- Email -->
-            <a href="mailto:info@hkmilestone.com?subject=免費諮詢查詢"
+            <a id="emailLink" href="mailto:info@hkmilestone.com?subject=免費諮詢查詢"
                class="inline-flex w-full items-center justify-center gap-3 rounded-lg border-2 border-accent px-6 py-4 text-base font-medium text-accent transition-colors hover:bg-accent hover:text-white">
               <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-              電郵查詢
+              <span data-i18n="email_btn">電郵查詢</span>
             </a>
 
             <div class="border-t border-border pt-4">
-              <p class="text-xs text-muted-foreground text-center">一般於一個工作天內回覆</p>
+              <p data-i18n="footer_note" class="text-xs text-muted-foreground text-center">一般於一個工作天內回覆</p>
             </div>
           </div>
         </div>
@@ -489,35 +491,35 @@
             </div>
             <span class="text-base font-bold text-primary-foreground">Milestone Technology</span>
           </div>
-          <p class="text-sm leading-relaxed text-primary-foreground/60">高效、可靠的技術方案伙伴。紮根香港，服務各行各業。</p>
+          <p data-i18n="tagline" class="text-sm leading-relaxed text-primary-foreground/60">高效、可靠的技術方案伙伴。紮根香港，服務各行各業。</p>
         </div>
 
         <!-- Links: 服務 -->
         <div>
-          <h3 class="mb-4 text-sm font-semibold text-primary-foreground">服務</h3>
+          <h3 data-i18n="col2_title" class="mb-4 text-sm font-semibold text-primary-foreground">服務</h3>
           <ul class="flex flex-col gap-3">
-            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">技術支援</a></li>
-            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">系統管理</a></li>
-            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">客製化開發</a></li>
-            <li><a href="#services" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">雲端方案</a></li>
+            <li><a href="#services" data-i18n="f_service1" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">技術支援</a></li>
+            <li><a href="#services" data-i18n="f_service2" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">系統管理</a></li>
+            <li><a href="#services" data-i18n="f_service3" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">客製化開發</a></li>
+            <li><a href="#services" data-i18n="f_service4" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">雲端方案</a></li>
           </ul>
         </div>
 
         <!-- Links: 公司 -->
         <div>
-          <h3 class="mb-4 text-sm font-semibold text-primary-foreground">公司</h3>
+          <h3 data-i18n="col3_title" class="mb-4 text-sm font-semibold text-primary-foreground">公司</h3>
           <ul class="flex flex-col gap-3">
-            <li><a href="#about" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">關於我們</a></li>
-            <li><a href="#projects" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">項目案例</a></li>
-            <li><a href="#why-us" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">為何選擇我們</a></li>
-            <li><a href="#contact" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">聯絡我們</a></li>
+            <li><a href="#about" data-i18n="f_company1" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">關於我們</a></li>
+            <li><a href="#projects" data-i18n="f_company2" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">項目案例</a></li>
+            <li><a href="#why-us" data-i18n="f_company3" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">為何選擇我們</a></li>
+            <li><a href="#contact" data-i18n="f_company4" class="text-sm text-primary-foreground/60 transition-colors hover:text-primary-foreground">聯絡我們</a></li>
           </ul>
         </div>
       </div>
 
       <div class="mt-12 border-t border-primary-foreground/10 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
         <p class="text-xs text-primary-foreground/50">&copy; 2026 Milestone Technology. All rights reserved.</p>
-        <p class="text-xs text-primary-foreground/50">香港</p>
+        <p data-i18n="location" class="text-xs text-primary-foreground/50">香港</p>
       </div>
     </div>
   </footer>
@@ -545,7 +547,6 @@
       }
     });
 
-    // Close mobile nav on link click
     document.querySelectorAll('.mobile-link').forEach(link => {
       link.addEventListener('click', () => {
         mobileNav.classList.add('hidden');
@@ -554,6 +555,147 @@
       });
     });
 
+    // ===== i18n =====
+    const translations = {
+      zh: {
+        nav_services: '服務', nav_about: '關於我們', nav_whyus: '為何選擇我們',
+        nav_projects: '項目案例', nav_contact: '聯絡我們', nav_consultation: '免費諮詢',
+        hero_title: '高效、可靠的技術方案伙伴',
+        hero_subtitle: '我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。',
+        hero_btn1: '了解我們的服務', hero_btn2: '聯絡我們',
+        services_label: '我們的服務', services_title: '全方位技術解決方案',
+        services_desc: '從日常技術支援到客製化開發，我們的專業團隊為您的業務提供端到端的技術服務。',
+        s1_title: '技術支援', s1_desc: '快速響應的遙距及現場支援，解決您日常遇到的各種技術難題，確保業務營運不受阻礙。',
+        s2_title: '系統管理', s2_desc: '專業的伺服器、網絡及基礎設施管理服務，保障您的 IT 系統穩定運行。',
+        s3_title: '客製化軟件開發', s3_desc: '根據您的業務需求，度身訂造高效的軟件解決方案，提升營運效率。',
+        s4_title: '雲端方案', s4_desc: '協助企業遷移至雲端平台，提供雲端架構設計及持續優化服務。',
+        s5_title: '資訊安全', s5_desc: '全面的網絡安全評估及防護方案，保護您的企業數據資產。',
+        s6_title: '技術講座', s6_desc: '分享行業知識與最新技術趨勢，提升團隊的專業技能與競爭力。',
+        about_label: '關於我們', about_title: '值得信賴的技術伙伴',
+        about_p1: 'Milestone Technology 紮根香港，專注為中小企業及機構提供高品質的技術服務。我們深明企業在數碼轉型過程中面對的挑戰，因此致力以務實、高效的方式，為客戶解決各種技術難題。',
+        about_p2: '憑藉逾二十年的實戰經驗，我們深明不同規模機構在日常運作中面對的實際挑戰。無論是系統整合、流程改善，還是度身訂造的軟件方案，我們都以務實、直接的方式協助客戶解決問題。',
+        stat1: '年行業經驗', stat2: '系統穩定率', stat3_value: '即日', stat3: '查詢回覆目標',
+        whyus_label: '為何選擇我們', whyus_title: '您的成功，就是我們的使命',
+        whyus_subtitle: '我們以客戶為中心，用專業和誠意贏得信任。',
+        r1_title: '快速響應', r1_desc: '積極跟進每一個支援請求，以即日回覆為目標，確保您的問題不被忽視。',
+        r2_title: '度身訂造', r2_desc: '每個企業都是獨特的。我們不提供一刀切的方案，而是根據您的實際需求量身設計。',
+        r3_title: '透明收費', r3_desc: '清晰的服務範圍和收費標準，沒有隱藏費用，讓您安心預算。',
+        r4_title: '持續支援', r4_desc: '我們不只是完成項目就離開。長期的技術支援和維護，是我們服務承諾的一部分。',
+        r5_title: '保密可靠', r5_desc: '嚴格保護客戶資料及業務機密，所有項目均依保密協議處理，讓您放心委託。',
+        r6_title: '本地團隊', r6_desc: '紮根香港的本地技術團隊，了解本地市場需求，溝通無障礙。',
+        projects_label: '項目案例', projects_title: '部分完成項目',
+        projects_desc: '以下為近期完成的客製化開發項目及自家開源工具。客戶案例按要求不披露詳細資料。',
+        p1_tag1: '客製化開發', p1_tag2: 'NGO', p1_title: '會員及管理系統',
+        p1_desc: '為機構度身開發會員管理系統，處理會員資料、會籍狀態及相關行政記錄，提升日常管理效率，減少人工處理時間。',
+        p1_f1: '會員資料及會籍管理', p1_f2: '行政記錄及查詢功能', p1_f3: '管理員後台操作介面',
+        p2_tag1: '客製化開發', p2_tag2: '航空專業', p2_title: '飛行員飛行記錄系統',
+        p2_desc: '為飛行員開發的數碼飛行日誌工具，取代傳統紙本記錄。支援飛行時數累計、航段記錄及資格追蹤，方便日常查閱及申報，符合業界標準格式。',
+        p2_f1: '飛行時數及航段記錄', p2_f2: '資格及執照有效期追蹤', p2_f3: '符合業界標準之報表輸出',
+        p2_btn: '前往查看',
+        p3_tag1: '開源工具', p3_tag2: '免費使用',
+        p3_desc: '本地 WiFi YouTube KTV 點歌系統。手機掃 QR 即可點歌，電視同步播放，AI 自動建立歌手歌庫，無需月費，自己架設。',
+        p3_f1: '搜尋 YouTube ／ 貼連結 ／ 載入播放清單', p3_f2: 'AI 自動分類歌手、語言及年代（需 MiniMax API）',
+        p3_f3: '支援 Mac / Windows / Linux', p3_btn1: '原始碼', p3_btn2: '免費下載',
+        contact_label: '聯絡我們', contact_title: '讓我們開始合作',
+        contact_desc: '無論您有任何技術需求或疑問，歡迎隨時與我們聯繫。我們的團隊會盡快回覆您。',
+        email_label: '電郵', phone_label: '電話',
+        card_desc: '選擇以下最方便的方式聯絡我們，我們將盡快回覆您的查詢。',
+        whatsapp_btn: 'WhatsApp 即時查詢', email_btn: '電郵查詢',
+        email_subject: '免費諮詢查詢', footer_note: '一般於一個工作天內回覆',
+        tagline: '高效、可靠的技術方案伙伴。紮根香港，服務各行各業。',
+        col2_title: '服務', col3_title: '公司',
+        f_service1: '技術支援', f_service2: '系統管理', f_service3: '客製化開發', f_service4: '雲端方案',
+        f_company1: '關於我們', f_company2: '項目案例', f_company3: '為何選擇我們', f_company4: '聯絡我們',
+        location: '香港',
+        meta_title: 'Milestone Technology | 高效、可靠的技術方案伙伴',
+        meta_desc: '我們提供全面的技術支援、系統管理及客製化軟件開發服務，助您專注業務發展。',
+      },
+      en: {
+        nav_services: 'Services', nav_about: 'About Us', nav_whyus: 'Why Us',
+        nav_projects: 'Projects', nav_contact: 'Contact', nav_consultation: 'Free Consultation',
+        hero_title: 'Your Reliable Technology Partner',
+        hero_subtitle: 'We provide comprehensive technical support, system management, and custom software development services to help you focus on your business growth.',
+        hero_btn1: 'Explore Our Services', hero_btn2: 'Contact Us',
+        services_label: 'Our Services', services_title: 'Comprehensive Technology Solutions',
+        services_desc: 'From daily technical support to custom development, our professional team provides end-to-end technology services for your business.',
+        s1_title: 'Technical Support', s1_desc: 'Rapid remote and on-site support to solve your daily technical challenges and ensure uninterrupted business operations.',
+        s2_title: 'System Management', s2_desc: 'Professional server, network, and infrastructure management services to ensure stable IT system operations.',
+        s3_title: 'Custom Software Development', s3_desc: 'Tailored software solutions based on your business needs to enhance operational efficiency.',
+        s4_title: 'Cloud Solutions', s4_desc: 'Help businesses migrate to cloud platforms with architecture design and ongoing optimization services.',
+        s5_title: 'Information Security', s5_desc: 'Comprehensive cybersecurity assessment and protection solutions to safeguard your business data assets.',
+        s6_title: 'Technical Seminars', s6_desc: 'Share industry knowledge and latest technology trends to enhance your team\'s professional skills and competitiveness.',
+        about_label: 'About Us', about_title: 'Your Trusted Technology Partner',
+        about_p1: 'Milestone Technology is based in Hong Kong, focused on providing high-quality technical services to small and medium enterprises and organizations. We understand the challenges businesses face during digital transformation and are committed to solving various technical problems in a practical and efficient manner.',
+        about_p2: 'With over twenty years of hands-on experience, we understand the practical challenges that organizations of different sizes face in their daily operations. Whether it\'s system integration, process improvement, or tailor-made software solutions, we assist our clients in a practical and direct manner.',
+        stat1: 'Years of Experience', stat2: 'System Uptime', stat3_value: 'Same Day', stat3: 'Response Target',
+        whyus_label: 'Why Choose Us', whyus_title: 'Your Success is Our Mission',
+        whyus_subtitle: 'We put customers first, earning trust through expertise and sincerity.',
+        r1_title: 'Rapid Response', r1_desc: 'Proactively follow up on every support request, aiming for same-day response to ensure your concerns are never overlooked.',
+        r2_title: 'Tailored Solutions', r2_desc: 'Every business is unique. We don\'t offer one-size-fits-all solutions; instead, we customize based on your specific requirements.',
+        r3_title: 'Transparent Pricing', r3_desc: 'Clear service scope and pricing with no hidden fees, giving you peace of mind with budgeting.',
+        r4_title: 'Ongoing Support', r4_desc: 'We don\'t just walk away after completing a project. Long-term technical support and maintenance are part of our service commitment.',
+        r5_title: 'Confidentiality & Reliability', r5_desc: 'Strict protection of client information and business secrets, with all projects handled under confidentiality agreements.',
+        r6_title: 'Local Team', r6_desc: 'A local Hong Kong-based technical team that understands market demands and ensures seamless communication.',
+        projects_label: 'Projects', projects_title: 'Selected Completed Projects',
+        projects_desc: 'Below are recently completed custom development projects and our own open-source tools. Client case details are not disclosed as per request.',
+        p1_tag1: 'Custom Development', p1_tag2: 'NGO', p1_title: 'Member & Management System',
+        p1_desc: 'A custom member management system developed for the organization, handling member information, membership status, and administrative records to improve efficiency and reduce manual processing.',
+        p1_f1: 'Member Information & Membership Management', p1_f2: 'Administrative Records & Query Functions', p1_f3: 'Admin Backend Interface',
+        p2_tag1: 'Custom Development', p2_tag2: 'Aviation', p2_title: 'Pilot Flight Log System',
+        p2_desc: 'A digital flight log tool for pilots to replace traditional paper records. Supports flight hour tracking, leg records, and qualification management, compliant with industry standard formats.',
+        p2_f1: 'Flight Hours & Leg Records', p2_f2: 'Qualification & License Validity Tracking', p2_f3: 'Industry-Standard Report Export',
+        p2_btn: 'View Project',
+        p3_tag1: 'Open Source', p3_tag2: 'Free to Use',
+        p3_desc: 'A local WiFi YouTube KTV song request system. Scan QR with your phone to request songs, synchronized TV playback with AI-powered artist library — no monthly fees, self-hosted.',
+        p3_f1: 'Search YouTube / Paste Links / Load Playlists', p3_f2: 'AI Auto-classify Artists, Language & Era (MiniMax API)',
+        p3_f3: 'Supports Mac / Windows / Linux', p3_btn1: 'Source Code', p3_btn2: 'Free Download',
+        contact_label: 'Contact Us', contact_title: 'Let\'s Work Together',
+        contact_desc: 'Feel free to reach out for any technical needs or questions. Our team will get back to you as soon as possible.',
+        email_label: 'Email', phone_label: 'Phone',
+        card_desc: 'Choose the most convenient way to reach us and we will respond to your inquiry promptly.',
+        whatsapp_btn: 'WhatsApp Inquiry', email_btn: 'Email Inquiry',
+        email_subject: 'Free Consultation Inquiry', footer_note: 'Response within 1 business day',
+        tagline: 'Your reliable technology partner. Based in Hong Kong, serving diverse industries.',
+        col2_title: 'Services', col3_title: 'Company',
+        f_service1: 'Technical Support', f_service2: 'System Management', f_service3: 'Custom Development', f_service4: 'Cloud Solutions',
+        f_company1: 'About Us', f_company2: 'Projects', f_company3: 'Why Us', f_company4: 'Contact',
+        location: 'Hong Kong',
+        meta_title: 'Milestone Technology | Your Reliable Technology Partner',
+        meta_desc: 'We provide comprehensive technical support, system management, and custom software development services to help you focus on your business growth.',
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'zh';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant-HK';
+      document.title = translations[lang].meta_title;
+      document.querySelector('meta[name="description"]').content = translations[lang].meta_desc;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key] !== undefined) {
+          el.textContent = translations[lang][key];
+        }
+      });
+
+      const emailLink = document.getElementById('emailLink');
+      if (emailLink) {
+        emailLink.href = 'mailto:info@hkmilestone.com?subject=' + encodeURIComponent(translations[lang].email_subject);
+      }
+
+      document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+        btn.textContent = lang === 'zh' ? 'EN' : '中文';
+      });
+    }
+
+    function toggleLang() {
+      setLanguage(currentLang === 'zh' ? 'en' : 'zh');
+    }
+
+    setLanguage(currentLang);
   </script>
 
 </body>

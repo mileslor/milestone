@@ -74,7 +74,7 @@
         <a href="#why-us" data-i18n="nav_whyus" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">為何選擇我們</a>
         <a href="#projects" data-i18n="nav_projects" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">項目案例</a>
         <a href="#contact" data-i18n="nav_contact" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
-        <button id="langToggle" onclick="toggleLang()" class="lang-toggle-btn px-3 py-1 rounded border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">EN</button>
+        <button onclick="toggleLang()" class="lang-toggle-btn inline-flex items-center gap-1 px-3 py-1 rounded border border-border text-xs transition-colors hover:border-foreground"><span class="lang-zh-label">中</span><span style="opacity:0.3">/</span><span class="lang-en-label">EN</span></button>
         <a href="#contact" data-i18n="nav_consultation" class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
       </nav>
 
@@ -94,7 +94,7 @@
         <a href="#projects" data-i18n="nav_projects" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">項目案例</a>
         <a href="#contact" data-i18n="nav_contact" class="mobile-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">聯絡我們</a>
         <a href="#contact" data-i18n="nav_consultation" class="mobile-link inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">免費諮詢</a>
-        <button id="langToggleMobile" onclick="toggleLang()" class="lang-toggle-btn w-full rounded border border-border py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">EN / 中</button>
+        <button onclick="toggleLang()" class="lang-toggle-btn w-full inline-flex items-center justify-center gap-1 rounded border border-border py-2 text-sm transition-colors hover:border-foreground"><span class="lang-zh-label">中</span><span style="opacity:0.3">/</span><span class="lang-en-label">EN</span></button>
       </div>
     </nav>
   </header>
@@ -686,8 +686,13 @@
         emailLink.href = 'mailto:info@hkmilestone.com?subject=' + encodeURIComponent(translations[lang].email_subject);
       }
 
-      document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
-        btn.textContent = lang === 'zh' ? 'EN' : '中文';
+      document.querySelectorAll('.lang-zh-label').forEach(el => {
+        el.style.fontWeight = lang === 'zh' ? '700' : '400';
+        el.style.color = lang === 'zh' ? 'hsl(213,32%,12%)' : 'hsl(213,10%,60%)';
+      });
+      document.querySelectorAll('.lang-en-label').forEach(el => {
+        el.style.fontWeight = lang === 'en' ? '700' : '400';
+        el.style.color = lang === 'en' ? 'hsl(213,32%,12%)' : 'hsl(213,10%,60%)';
       });
     }
 

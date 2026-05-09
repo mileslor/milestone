@@ -50,7 +50,7 @@
         <span class="text-lg font-bold tracking-tight text-foreground">Milestone</span>
       </a>
       <div class="flex items-center gap-4">
-        <button id="langToggle" onclick="toggleLang()" class="lang-toggle-btn px-3 py-1 rounded border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">EN</button>
+        <button onclick="toggleLang()" class="lang-toggle-btn inline-flex items-center gap-1 px-3 py-1 rounded border border-border text-xs transition-colors hover:border-foreground"><span class="lang-zh-label">中</span><span style="opacity:0.3">/</span><span class="lang-en-label">EN</span></button>
         <a href="/" data-i18n="back_home" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">← 返回主頁</a>
       </div>
     </div>
@@ -348,8 +348,13 @@
       document.getElementById('disclaimer-zh').style.display = lang === 'zh' ? '' : 'none';
       document.getElementById('disclaimer-en').style.display = lang === 'en' ? '' : 'none';
 
-      document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
-        btn.textContent = lang === 'zh' ? 'EN' : '中文';
+      document.querySelectorAll('.lang-zh-label').forEach(el => {
+        el.style.fontWeight = lang === 'zh' ? '700' : '400';
+        el.style.color = lang === 'zh' ? 'hsl(213,32%,12%)' : 'hsl(213,10%,60%)';
+      });
+      document.querySelectorAll('.lang-en-label').forEach(el => {
+        el.style.fontWeight = lang === 'en' ? '700' : '400';
+        el.style.color = lang === 'en' ? 'hsl(213,32%,12%)' : 'hsl(213,10%,60%)';
       });
     }
 

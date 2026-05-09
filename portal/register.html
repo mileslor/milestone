@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>裝置登記 — 職員更期查詢</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, sans-serif; background: #f2f2f7; min-height: 100vh;
+         display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .card { background: #fff; border-radius: 16px; padding: 32px 24px; width: 100%; max-width: 400px;
+          box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .logo { text-align: center; margin-bottom: 24px; }
+  .logo h1 { font-size: 20px; font-weight: 700; color: #1c1c1e; margin: 8px 0 4px; }
+  .logo p { font-size: 14px; color: #8e8e93; margin: 0; }
+  label { display: block; font-size: 13px; color: #8e8e93; margin-bottom: 6px; font-weight: 500; }
+  input { width: 100%; padding: 14px 16px; border: 1.5px solid #e5e5ea; border-radius: 10px;
+          font-size: 16px; outline: none; transition: border-color .2s; }
+  input:focus { border-color: #007aff; }
+  .btn { width: 100%; padding: 14px; background: #007aff; color: #fff; border: none;
+         border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px;
+         transition: opacity .2s; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .status-box { display: none; margin-top: 20px; padding: 16px; border-radius: 10px;
+                background: #f2f2f7; text-align: center; }
+  .status-box.pending { display: block; }
+  .status-box .icon { font-size: 36px; margin-bottom: 8px; }
+  .status-box p { margin: 4px 0; font-size: 14px; color: #3c3c43; }
+  .status-box p.bold { font-weight: 600; color: #1c1c1e; }
+  .error { color: #ff3b30; font-size: 13px; margin-top: 8px; display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div style="font-size:48px">📅</div>
+    <h1>職員更期查詢</h1>
+    <p>請登記您的裝置以查閱更期表</p>
+  </div>
+
+  <div id="formSection">
+    <label for="username">登入名稱</label>
+    <input type="text" id="username" placeholder="輸入您的用戶名" autocomplete="username"
+           autocapitalize="none" autocorrect="off" spellcheck="false">
+    <p class="error" id="errMsg"></p>
+    <button class="btn" id="submitBtn" onclick="register()">登記裝置</button>
+  </div>
+
+  <div class="status-box" id="pendingBox">
+    <div class="icon">⏳</div>
+    <p class="bold">等待管理員批准</p>
+    <p>請返回中心，由管理員批准此裝置。</p>
+    <p style="margin-top:12px; color:#8e8e93; font-size:12px">此頁面會自動更新</p>
+  </div>
+</div>
+
+<script>
+const UUID_KEY = 'portal_device_uuid';
+const TOKEN_KEY = 'portal_device_token';
+const EXPIRES_KEY = 'portal_token_expires';
+const USER_KEY = 'portal_username';
+
+function getOrCreateUUID() {
+  let id = localStorage.getItem(UUID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(UUID_KEY, id);
+  }
+  return id;
+}
+
+function deviceLabel() {
+  const ua = navigator.userAgent;
+  if (/iPhone/.test(ua)) return 'iPhone / Safari';
+  if (/iPad/.test(ua)) return 'iPad / Safari';
+  if (/Android/.test(ua)) return 'Android';
+  return 'Desktop Browser';
+}
+
+async function register() {
+  const username = document.getElementById('username').value.trim();
+  const err = document.getElementById('errMsg');
+  const btn = document.getElementById('submitBtn');
+  err.style.display = 'none';
+
+  if (!username) { err.textContent = '請輸入用戶名稱'; err.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '登記中…';
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_uuid: getOrCreateUUID(), username, device_label: deviceLabel() }),
+    });
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error || '登記失敗');
+
+    localStorage.setItem(USER_KEY, username);
+
+    if (data.status === 'approved') {
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(EXPIRES_KEY, data.expires_at);
+      location.replace('/portal/roster.html');
+      return;
+    }
+
+    // pending: show waiting screen and start polling
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('pendingBox').classList.add('pending');
+    startPolling();
+  } catch (e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '登記裝置';
+  }
+}
+
+function startPolling() {
+  const uuid = localStorage.getItem(UUID_KEY);
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch('/api/auth/status', { headers: { 'X-Device-Uuid': uuid } });
+      const data = await res.json();
+      if (data.status === 'approved') {
+        clearInterval(interval);
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(EXPIRES_KEY, data.expires_at);
+        location.replace('/portal/roster.html');
+      }
+    } catch {}
+  }, 10000); // poll every 10s
+}
+
+// If already pending from before, skip form
+(function init() {
+  const uuid = localStorage.getItem(UUID_KEY);
+  if (!uuid) return;
+  fetch('/api/auth/status', { headers: { 'X-Device-Uuid': uuid } })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'approved') {
+        localStorage.setItem(TOKEN_KEY, d.token);
+        localStorage.setItem(EXPIRES_KEY, d.expires_at);
+        location.replace('/portal/roster.html');
+      } else if (d.status === 'pending') {
+        const saved = localStorage.getItem(USER_KEY);
+        if (saved) document.getElementById('username').value = saved;
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('pendingBox').classList.add('pending');
+        startPolling();
+      }
+    })
+    .catch(() => {});
+})();
+</script>
+</body>
+</html>

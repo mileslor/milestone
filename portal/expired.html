@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>裝置已過期 — 職員更期查詢</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, sans-serif; background: #f2f2f7; min-height: 100vh;
+         display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .card { background: #fff; border-radius: 16px; padding: 40px 24px; width: 100%; max-width: 400px;
+          box-shadow: 0 2px 12px rgba(0,0,0,.08); text-align: center; }
+  .icon { font-size: 56px; margin-bottom: 16px; }
+  h1 { font-size: 20px; font-weight: 700; color: #1c1c1e; margin: 0 0 8px; }
+  p { font-size: 15px; color: #3c3c43; line-height: 1.5; margin: 0 0 24px; }
+  .btn { display: inline-block; padding: 14px 32px; background: #007aff; color: #fff; border: none;
+         border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🔒</div>
+  <h1>裝置授權已過期</h1>
+  <p>您的裝置授權已過期或被撤銷，請返回中心由管理員續期。</p>
+  <a class="btn" href="/portal/register.html">重新登記</a>
+</div>
+<script>
+  // Clear expired token
+  localStorage.removeItem('portal_device_token');
+  localStorage.removeItem('portal_token_expires');
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+name = "milestone"
+pages_build_output_dir = "."
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portal-db"
+database_id = "52b3d225-141a-4553-8543-abdcd53a0561"

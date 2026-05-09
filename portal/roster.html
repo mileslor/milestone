@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>我的更期 — 職員更期查詢</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, sans-serif; background: #f2f2f7; }
+
+  /* Header */
+  .header { background: #007aff; color: #fff; padding: 16px 20px 14px; position: sticky; top: 0; z-index: 10; }
+  .header h1 { margin: 0; font-size: 18px; font-weight: 700; }
+  .header .sub { font-size: 13px; opacity: .85; margin-top: 2px; }
+  .header-row { display: flex; align-items: center; justify-content: space-between; }
+  .week-btn { background: rgba(255,255,255,.2); border: none; color: #fff; padding: 6px 12px;
+              border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; }
+  .week-btn:active { background: rgba(255,255,255,.3); }
+
+  /* Week selector */
+  .week-sheet { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+                border-radius: 20px 20px 0 0; padding: 16px 0 32px; z-index: 100;
+                box-shadow: 0 -4px 24px rgba(0,0,0,.12); max-height: 50vh; overflow-y: auto; }
+  .week-sheet.open { display: block; }
+  .week-sheet h3 { margin: 0 20px 12px; font-size: 15px; color: #8e8e93; font-weight: 500; }
+  .week-item { padding: 14px 20px; font-size: 15px; cursor: pointer; border-bottom: 1px solid #f2f2f7; }
+  .week-item:active { background: #f2f2f7; }
+  .week-item.active { color: #007aff; font-weight: 600; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 99; }
+  .overlay.open { display: block; }
+
+  /* Content */
+  .content { padding: 16px; }
+  .section-title { font-size: 13px; font-weight: 600; color: #8e8e93; text-transform: uppercase;
+                   letter-spacing: .5px; margin: 16px 0 8px; }
+
+  /* Day cards */
+  .day-card { background: #fff; border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+  .day-header { padding: 12px 16px 8px; border-bottom: 1px solid #f2f2f7; }
+  .day-header .date-line { display: flex; align-items: center; gap: 8px; }
+  .day-header .day-name { font-size: 15px; font-weight: 600; color: #1c1c1e; }
+  .day-header .date-str { font-size: 13px; color: #8e8e93; }
+  .holiday-badge { background: #ff3b30; color: #fff; font-size: 11px; font-weight: 600;
+                   padding: 2px 7px; border-radius: 6px; }
+  .entry { padding: 10px 16px; border-bottom: 1px solid #f2f2f7; }
+  .entry:last-child { border-bottom: none; }
+  .entry-time { font-size: 13px; color: #8e8e93; margin-bottom: 2px; }
+  .entry-name { font-size: 15px; color: #1c1c1e; font-weight: 500; }
+  .entry-meta { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
+  .badge-do1 { background: #ffd60a22; color: #b07d00; }
+  .badge-do2 { background: #30d15822; color: #1a7a35; }
+  .badge-pending { background: #ff9f0a22; color: #b06000; }
+  .badge-session { background: #007aff22; color: #0055cc; }
+  .leave-row { padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .leave-type { background: #af52de22; color: #6a3194; font-size: 12px; font-weight: 700;
+                padding: 3px 8px; border-radius: 6px; }
+  .leave-text { font-size: 14px; color: #3c3c43; }
+
+  /* No data */
+  .empty { text-align: center; padding: 48px 24px; color: #8e8e93; }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 48px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #ddd; border-top-color: #007aff;
+             border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .pushed-at { font-size: 12px; color: #8e8e93; text-align: right; padding: 0 4px 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div>
+      <h1 id="staffName">我的更期</h1>
+      <div class="sub" id="weekRange">載入中…</div>
+    </div>
+    <button class="week-btn" onclick="openWeekSheet()">換週 ›</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeWeekSheet()"></div>
+<div class="week-sheet" id="weekSheet">
+  <h3>選擇週次</h3>
+  <div id="weekList"></div>
+</div>
+
+<div class="content" id="content">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<script>
+const TOKEN_KEY = 'portal_device_token';
+const EXPIRES_KEY = 'portal_token_expires';
+
+const token = localStorage.getItem(TOKEN_KEY);
+if (!token) location.replace('/portal/register.html');
+
+const SESSION_LABEL = { A: '上午', P: '下午', N: '夜班' };
+const LEAVE_LABEL = { AL: '年假', CL: '補假', SL: '病假', OT: '加班補假', SPL: '特別假' };
+const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+
+let currentWeekStart = null;
+let allWeeks = [];
+
+async function apiFetch(url) {
+  const res = await fetch(url, { headers: { 'X-Device-Token': token } });
+  if (res.status === 401) { location.replace('/portal/expired.html'); throw new Error('auth'); }
+  return res.json();
+}
+
+async function loadWeeks() {
+  const data = await apiFetch('/api/roster/weeks');
+  if (!data.ok) return;
+  allWeeks = data.weeks || [];
+  const list = document.getElementById('weekList');
+  list.innerHTML = allWeeks.map(w =>
+    `<div class="week-item${w.week_start === currentWeekStart ? ' active' : ''}"
+          onclick="selectWeek('${w.week_start}')">
+       ${formatWeekLabel(w.week_start, w.week_end)}
+     </div>`
+  ).join('');
+}
+
+function formatWeekLabel(ws, we) {
+  const s = ws.replace(/-/g, '/');
+  const e = we.replace(/-/g, '/').slice(5);
+  return `${s} – ${e}`;
+}
+
+async function loadRoster(week_start) {
+  document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const url = week_start ? `/api/roster?week_start=${week_start}` : '/api/roster';
+    const data = await apiFetch(url);
+    if (!data.ok) { renderEmpty('找不到更期資料'); return; }
+    currentWeekStart = data.week_start;
+    document.getElementById('staffName').textContent = data.staff_name || '我的更期';
+    document.getElementById('weekRange').textContent = formatWeekLabel(data.week_start, data.week_end);
+    renderRoster(data);
+  } catch (e) {
+    if (e.message !== 'auth') renderEmpty('載入失敗，請重試');
+  }
+}
+
+function renderEmpty(msg) {
+  document.getElementById('content').innerHTML =
+    `<div class="empty"><div class="icon">📭</div><p>${msg}</p></div>`;
+}
+
+function renderRoster(data) {
+  const holidays = {};
+  (data.public_holidays || []).forEach(h => holidays[h.date] = h.name);
+
+  // Build date list for the week
+  const dates = [];
+  const start = new Date(data.week_start + 'T00:00:00');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+
+  // Group entries and leaves by date
+  const entriesByDate = {};
+  const leavesByDate = {};
+  (data.entries || []).forEach(e => {
+    (entriesByDate[e.date] = entriesByDate[e.date] || []).push(e);
+  });
+  (data.leaves || []).forEach(l => {
+    (leavesByDate[l.date] = leavesByDate[l.date] || []).push(l);
+  });
+
+  let html = '';
+
+  dates.forEach(dateStr => {
+    const entries = entriesByDate[dateStr] || [];
+    const leaves = leavesByDate[dateStr] || [];
+    if (!entries.length && !leaves.length) return;
+
+    const d = new Date(dateStr + 'T00:00:00');
+    const dayName = DAY_NAMES[d.getDay()];
+    const holiday = holidays[dateStr];
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    html += `<div class="day-card">
+      <div class="day-header">
+        <div class="date-line">
+          <span class="day-name">（${dayName}）${mm}/${dd}</span>
+          ${holiday ? `<span class="holiday-badge">${holiday}</span>` : ''}
+        </div>
+      </div>`;
+
+    entries.forEach(e => {
+      const picBadge = e.pic_role === 1
+        ? '<span class="badge badge-do1">DO1</span>'
+        : e.pic_role === 2 ? '<span class="badge badge-do2">DO2</span>' : '';
+      const pendingBadge = e.header_status === 'pending_approval'
+        ? '<span class="badge badge-pending">待批准</span>' : '';
+      const sessionBadge = `<span class="badge badge-session">${SESSION_LABEL[e.session] || e.session}</span>`;
+
+      html += `<div class="entry">
+        <div class="entry-time">${e.start_time} – ${e.end_time}（${e.duration_hours}小時）</div>
+        <div class="entry-name">${e.activity_name}</div>
+        <div class="entry-meta">${sessionBadge}${picBadge}${pendingBadge}</div>
+      </div>`;
+    });
+
+    leaves.forEach(l => {
+      const typeLabel = LEAVE_LABEL[l.type] || l.type;
+      const sessionLabel = l.session ? `（${SESSION_LABEL[l.session] || l.session}）` : '';
+      html += `<div class="leave-row">
+        <span class="leave-type">${typeLabel}</span>
+        <span class="leave-text">${l.duration_hours}小時${sessionLabel}</span>
+      </div>`;
+    });
+
+    html += '</div>';
+  });
+
+  if (!html) html = '<div class="empty"><div class="icon">😴</div><p>本週沒有更期記錄</p></div>';
+  html += `<div class="pushed-at">更新時間：${(data.pushed_at || '').replace('T', ' ')}</div>`;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function openWeekSheet() {
+  loadWeeks();
+  document.getElementById('weekSheet').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeWeekSheet() {
+  document.getElementById('weekSheet').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function selectWeek(week_start) {
+  closeWeekSheet();
+  loadRoster(week_start);
+}
+
+// Init
+loadRoster(null);
+</script>
+</body>
+</html>

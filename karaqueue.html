@@ -84,6 +84,18 @@
             <span data-i18n="btn_download">免費下載</span>
           </a>
         </div>
+        <div class="mt-6 rounded-xl bg-white/10 border border-white/20 px-5 py-4 text-left text-sm text-primary-foreground/80 max-w-xl mx-auto space-y-2">
+          <div id="install-zh">
+            <p class="font-semibold text-white">📦 安裝說明</p>
+            <p><span class="font-medium text-white">🍎 Mac：</span>將 .dmg 安裝後把 App 拖入 Applications，然後開啟 Terminal 執行：<br><code class="mt-1 block bg-black/30 rounded px-3 py-1 font-mono text-xs text-white">xattr -cr "/Applications/KaraQueue TV.app"</code>再 double-click 開啟即可。</p>
+            <p><span class="font-medium text-white">🪟 Windows：</span>執行 .exe 安裝程式，若 SmartScreen 出現警告，按「更多資訊」→「仍要執行」即可。</p>
+          </div>
+          <div id="install-en" style="display:none">
+            <p class="font-semibold text-white">📦 Installation Notes</p>
+            <p><span class="font-medium text-white">🍎 Mac：</span>Open the .dmg, drag the app to Applications, then open Terminal and run:<br><code class="mt-1 block bg-black/30 rounded px-3 py-1 font-mono text-xs text-white">xattr -cr "/Applications/KaraQueue TV.app"</code>Then double-click to open.</p>
+            <p><span class="font-medium text-white">🪟 Windows：</span>Run the .exe installer. If SmartScreen appears, click "More info" → "Run anyway".</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -356,6 +368,8 @@
       document.getElementById('disclaimer-en').style.display = lang === 'en' ? '' : 'none';
       document.getElementById('agree-label-zh').style.display = lang === 'zh' ? '' : 'none';
       document.getElementById('agree-label-en').style.display = lang === 'en' ? '' : 'none';
+      document.getElementById('install-zh').style.display = lang === 'zh' ? '' : 'none';
+      document.getElementById('install-en').style.display = lang === 'en' ? '' : 'none';
 
       document.querySelectorAll('.lang-zh-label').forEach(el => {
         el.style.fontWeight = lang === 'zh' ? '700' : '400';

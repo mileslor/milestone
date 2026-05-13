@@ -49,7 +49,10 @@
         </div>
         <span class="text-lg font-bold tracking-tight text-foreground">Milestone</span>
       </a>
-      <a href="/" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">← 返回主頁</a>
+      <div class="flex items-center gap-4">
+        <button onclick="toggleLang()" class="lang-toggle-btn inline-flex items-center gap-1 px-3 py-1 rounded border border-border text-xs transition-colors hover:border-foreground"><span class="lang-zh-label">中</span><span style="opacity:0.3">/</span><span class="lang-en-label">EN</span></button>
+        <a href="/" data-i18n="back_home" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">← 返回主頁</a>
+      </div>
     </div>
   </header>
 
@@ -60,13 +63,25 @@
       <div class="mx-auto max-w-4xl px-6 text-center">
         <div class="mb-6 text-7xl">🎤</div>
         <h1 class="mb-4 text-4xl font-bold tracking-tight md:text-5xl">KaraQueue</h1>
-        <p class="mb-3 text-xl text-primary-foreground/80">本地 WiFi KTV 點歌系統</p>
-        <p class="mb-10 text-base leading-relaxed text-primary-foreground/65 max-w-2xl mx-auto">免費開源工具。手機掃 QR 即可點歌，電視大屏播放，AI 自動建立歌手歌庫，無需月費，自己架設。</p>
-        <div class="flex flex-col gap-4 sm:flex-row justify-center">
+        <p data-i18n="hero_sub" class="mb-3 text-xl text-primary-foreground/80">本地 WiFi KTV 點歌系統</p>
+        <p data-i18n="hero_desc" class="mb-10 text-base leading-relaxed text-primary-foreground/65 max-w-2xl mx-auto">免費開源工具。手機掃 QR 即可點歌，電視大屏播放，AI 自動建立歌手歌庫，無需月費，自己架設。</p>
+        <div class="flex justify-center mb-5">
+          <label class="flex items-start gap-2 text-sm text-primary-foreground/75 cursor-pointer select-none">
+            <input type="checkbox" id="agree-disclaimer" class="mt-0.5 accent-white shrink-0" onchange="setDownloadEnabled(this.checked)">
+            <span id="agree-label-zh">我已閱讀並同意 <a href="#disclaimer" class="underline hover:text-white" onclick="event.stopPropagation()">免責聲明</a></span>
+            <span id="agree-label-en" style="display:none">I have read and agreed to the <a href="#disclaimer" class="underline hover:text-white" onclick="event.stopPropagation()">Disclaimer</a></span>
+          </label>
+        </div>
+        <div id="download-btns" class="flex flex-col gap-4 sm:flex-row justify-center opacity-40 pointer-events-none transition-opacity duration-200">
           <a href="https://github.com/mileslor/karaqueue-v2" target="_blank" rel="noopener"
              class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/20">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-            GitHub 原始碼
+            <span data-i18n="btn_github">GitHub 原始碼 / 下載</span>
+          </a>
+          <a href="https://github.com/mileslor/karaqueue-v2/releases/latest" target="_blank" rel="noopener"
+             class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-base font-medium text-white transition-colors hover:bg-accent/90">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            <span data-i18n="btn_download">免費下載</span>
           </a>
         </div>
       </div>
@@ -76,127 +91,40 @@
     <section class="py-20 bg-background">
       <div class="mx-auto max-w-5xl px-6">
         <div class="mb-12 text-center">
-          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">功能特點</p>
-          <h2 class="text-3xl font-bold tracking-tight md:text-4xl">簡單架設，即刻開唱</h2>
+          <p data-i18n="features_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">功能特點</p>
+          <h2 data-i18n="features_title" class="text-3xl font-bold tracking-tight md:text-4xl">簡單架設，即刻開唱</h2>
         </div>
         <div class="grid gap-6 md:grid-cols-3">
           <div class="rounded-2xl border border-border bg-card p-6">
             <div class="mb-4 text-3xl">📱</div>
-            <h3 class="mb-2 font-semibold">手機掃碼點歌</h3>
-            <p class="text-sm text-muted-foreground">手機掃 QR Code 即可加入點歌，無需安裝任何 App，支援多人同時使用。</p>
+            <h3 data-i18n="f1_title" class="mb-2 font-semibold">手機掃碼點歌</h3>
+            <p data-i18n="f1_desc" class="text-sm text-muted-foreground">手機掃 QR Code 即可加入點歌，無需安裝任何 App，支援多人同時使用。</p>
           </div>
           <div class="rounded-2xl border border-border bg-card p-6">
             <div class="mb-4 text-3xl">🤖</div>
-            <h3 class="mb-2 font-semibold">AI 自動建立歌庫</h3>
-            <p class="text-sm text-muted-foreground">播放 2 分鐘後 AI 自動分析歌手、語言及年代，建立可瀏覽的本地歌庫（需 AI API Key）。</p>
+            <h3 data-i18n="f2_title" class="mb-2 font-semibold">AI 自動建立歌庫</h3>
+            <p data-i18n="f2_desc" class="text-sm text-muted-foreground">播放 2 分鐘後 AI 自動分析歌手、語言及年代，建立可瀏覽的本地歌庫（需 AI API Key）。</p>
           </div>
           <div class="rounded-2xl border border-border bg-card p-6">
             <div class="mb-4 text-3xl">📺</div>
-            <h3 class="mb-2 font-semibold">全平台 TV 客戶端</h3>
-            <p class="text-sm text-muted-foreground">支援 Android TV、Mac、Windows、Linux 及 Steam Deck，透過內置 Proxy 繞過 YouTube 來源限制，實現全屏自動播放。</p>
-          </div>
-          <div class="rounded-2xl border border-border bg-card p-6">
-            <div class="mb-4 text-3xl">🏠</div>
-            <h3 class="mb-2 font-semibold">多房間同時進行</h3>
-            <p class="text-sm text-muted-foreground">一台主機可開多個獨立房間，各房間有自己的播放 Queue 及專屬色系，適合多組人同時 KTV。</p>
-          </div>
-          <div class="rounded-2xl border border-border bg-card p-6">
-            <div class="mb-4 text-3xl">🎵</div>
-            <h3 class="mb-2 font-semibold">完整播放控制</h3>
-            <p class="text-sm text-muted-foreground">支援插播、調音量、上下首、重播、隨機播放，操作即時同步到電視。歌單可匯出／匯入及鎖定。</p>
+            <h3 data-i18n="f3_title" class="mb-2 font-semibold">大屏電視播放</h3>
+            <p data-i18n="f3_desc" class="text-sm text-muted-foreground">電視畫面支援 Android TV APK，透過本地 WiFi 實現大屏播放，音質畫質由 YouTube 保證。</p>
           </div>
           <div class="rounded-2xl border border-border bg-card p-6">
             <div class="mb-4 text-3xl">🔒</div>
-            <h3 class="mb-2 font-semibold">資料完全私有</h3>
-            <p class="text-sm text-muted-foreground">Node.js 本地伺服器，所有歌單資料只存在您自己的設備，不上傳任何資訊。Server 可獨立運作，無需 TV App。</p>
+            <h3 data-i18n="f4_title" class="mb-2 font-semibold">資料完全私有</h3>
+            <p data-i18n="f4_desc" class="text-sm text-muted-foreground">Node.js 本地伺服器，所有歌單資料只存在您自己的設備，不上傳任何資訊。</p>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Download -->
-    <section class="py-20 bg-primary/5" id="download">
-      <div class="mx-auto max-w-5xl px-6">
-        <div class="mb-12 text-center">
-          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">免費下載</p>
-          <h2 class="text-3xl font-bold tracking-tight md:text-4xl">選擇你的平台</h2>
-          <p class="mt-3 text-muted-foreground text-sm max-w-xl mx-auto">Server 可獨立運行，TV App 為可選元件，用於解決非本機裝置的 YouTube 播放限制。</p>
-        </div>
-
-        <!-- Server -->
-        <div class="rounded-2xl border border-border bg-card p-8 mb-6">
-          <div class="flex items-start gap-5">
-            <div class="text-4xl flex-shrink-0">🖥️</div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-3 mb-2 flex-wrap">
-                <h3 class="text-lg font-bold">Server（必裝）</h3>
-                <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">Mac / Windows / Linux</span>
-              </div>
-              <p class="text-sm text-muted-foreground mb-4">主系統，處理點歌 Queue、YouTube 搜尋、歌庫管理。安裝後其他裝置可透過瀏覽器或 App 使用。Server 本身已可完整運作，TV App 為可選。</p>
-              <div class="bg-muted rounded-xl p-4 font-mono text-sm text-foreground/80 mb-4 overflow-x-auto">
-                <div class="text-muted-foreground text-xs mb-2"># 需要 Node.js 18+</div>
-                git clone https://github.com/mileslor/karaqueue-v2.git<br>
-                cd karaqueue-v2 &amp;&amp; npm install<br>
-                node server.js
-              </div>
-              <a href="https://github.com/mileslor/karaqueue-v2" target="_blank" rel="noopener"
-                 class="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-                GitHub 原始碼 →
-              </a>
-            </div>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">🎵</div>
+            <h3 data-i18n="f5_title" class="mb-2 font-semibold">完整播放控制</h3>
+            <p data-i18n="f5_desc" class="text-sm text-muted-foreground">支援插播、調音量、上下首、重播，所有操作即時同步到電視。</p>
           </div>
-        </div>
-
-        <!-- TV Apps -->
-        <h3 class="text-base font-semibold text-muted-foreground mb-4 px-1">📺 TV 客戶端 App（可選）</h3>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <a href="https://github.com/mileslor/karaqueue-v2/releases/latest/download/KaraQueue.TV-1.0.0-arm64.dmg"
-             class="flex items-center gap-4 rounded-xl border border-border bg-card p-5 hover:border-accent/50 hover:bg-accent/5 transition-all group">
-            <span class="text-3xl">🍎</span>
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-sm">Mac (Apple Silicon)</div>
-              <div class="text-xs text-muted-foreground">M1 / M2 / M3 / M4 · .dmg</div>
-            </div>
-            <svg class="h-4 w-4 text-muted-foreground group-hover:text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-          </a>
-          <a href="https://github.com/mileslor/karaqueue-v2/releases/latest/download/KaraQueue.TV-1.0.0.dmg"
-             class="flex items-center gap-4 rounded-xl border border-border bg-card p-5 hover:border-accent/50 hover:bg-accent/5 transition-all group">
-            <span class="text-3xl">🍎</span>
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-sm">Mac (Intel)</div>
-              <div class="text-xs text-muted-foreground">Intel Core · .dmg</div>
-            </div>
-            <svg class="h-4 w-4 text-muted-foreground group-hover:text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-          </a>
-          <a href="https://github.com/mileslor/karaqueue-v2/releases/latest/download/KaraQueue.TV.Setup.1.0.0.exe"
-             class="flex items-center gap-4 rounded-xl border border-border bg-card p-5 hover:border-accent/50 hover:bg-accent/5 transition-all group">
-            <span class="text-3xl">🪟</span>
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-sm">Windows</div>
-              <div class="text-xs text-muted-foreground">Windows 10/11 x64 · .exe</div>
-            </div>
-            <svg class="h-4 w-4 text-muted-foreground group-hover:text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-          </a>
-          <a href="https://github.com/mileslor/karaqueue-v2/releases/latest/download/KaraQueue.TV-1.0.0.AppImage"
-             class="flex items-center gap-4 rounded-xl border border-border bg-card p-5 hover:border-accent/50 hover:bg-accent/5 transition-all group">
-            <span class="text-3xl">🐧</span>
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-sm">Linux / Steam Deck</div>
-              <div class="text-xs text-muted-foreground">x64 · .AppImage</div>
-            </div>
-            <svg class="h-4 w-4 text-muted-foreground group-hover:text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-          </a>
-          <a href="https://github.com/mileslor/karaqueue-v2/releases/tag/v1.0.0"
-             target="_blank" rel="noopener"
-             class="flex items-center gap-4 rounded-xl border border-border bg-card p-5 hover:border-accent/50 hover:bg-accent/5 transition-all group sm:col-span-2">
-            <span class="text-3xl">🤖</span>
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-sm">Android TV</div>
-              <div class="text-xs text-muted-foreground">Android TV / Fire TV · .apk（需側載安裝）</div>
-            </div>
-            <svg class="h-4 w-4 text-muted-foreground group-hover:text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-          </a>
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 text-3xl">💻</div>
+            <h3 data-i18n="f6_title" class="mb-2 font-semibold">跨平台支援</h3>
+            <p data-i18n="f6_desc" class="text-sm text-muted-foreground">支援 Mac / Windows / Linux，只需安裝 Node.js 即可運行，無需其他依賴。</p>
+          </div>
         </div>
       </div>
     </section>
@@ -205,13 +133,13 @@
     <section class="py-20 bg-muted" id="disclaimer">
       <div class="mx-auto max-w-4xl px-6">
         <div class="mb-10 text-center">
-          <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">法律聲明</p>
-          <h2 class="text-3xl font-bold tracking-tight">免責聲明 / Disclaimer</h2>
+          <p data-i18n="disclaimer_label" class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">法律聲明</p>
+          <h2 data-i18n="disclaimer_title" class="text-3xl font-bold tracking-tight">免責聲明</h2>
           <p class="mt-3 text-sm text-muted-foreground">最後更新：2025 年 5 月 ／ Last Updated: May 2025</p>
         </div>
 
         <!-- Chinese -->
-        <div class="rounded-2xl border border-border bg-card p-8 mb-8 disclaimer-body">
+        <div id="disclaimer-zh" class="rounded-2xl border border-border bg-card p-8 mb-8 disclaimer-body">
           <h2 class="text-xl font-bold mb-6 pb-4 border-b border-border">繁體中文版</h2>
 
           <p>感謝您使用 KaraQueue。本軟件為由 Milestone Technology（下稱「本公司」）開發及發布的開源免費工具。使用本軟件即表示您同意接受本免責聲明的全部條款。</p>
@@ -277,7 +205,7 @@
         </div>
 
         <!-- English -->
-        <div class="rounded-2xl border border-border bg-card p-8 disclaimer-body">
+        <div id="disclaimer-en" class="rounded-2xl border border-border bg-card p-8 disclaimer-body" style="display:none">
           <h2 class="text-xl font-bold mb-6 pb-4 border-b border-border">English Version</h2>
 
           <p>Thank you for using KaraQueue. This software is an open-source free tool developed and published by Milestone Technology (hereinafter "the Company"). By using this software, you agree to be bound by all terms of this Disclaimer.</p>
@@ -344,16 +272,6 @@
           <h3>11. Contact</h3>
           <p>If you have any questions regarding this Disclaimer, please contact Milestone Technology via <strong>hkmilestone.com</strong>.</p>
         </div>
-
-        <!-- CTA to download -->
-        <div class="mt-10 text-center">
-          <p class="text-sm text-muted-foreground mb-4">閱畢免責聲明後，即可前往下載。<br>After reading the Disclaimer, proceed to download.</p>
-          <a href="#download"
-             class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-3 text-base font-medium text-white transition-colors hover:bg-accent/90">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-            前往下載 / Download
-          </a>
-        </div>
       </div>
     </section>
 
@@ -366,6 +284,101 @@
       <p class="mt-1"><a href="/" class="hover:text-primary-foreground transition-colors">hkmilestone.com</a></p>
     </div>
   </footer>
+
+  <script>
+    const translations = {
+      zh: {
+        back_home: '← 返回主頁',
+        hero_sub: '本地 WiFi KTV 點歌系統',
+        hero_desc: '免費開源工具。手機掃 QR 即可點歌，電視大屏播放，AI 自動建立歌手歌庫，無需月費，自己架設。',
+        btn_github: 'GitHub 原始碼 / 下載',
+        btn_download: '免費下載',
+        features_label: '功能特點',
+        features_title: '簡單架設，即刻開唱',
+        f1_title: '手機掃碼點歌',
+        f1_desc: '手機掃 QR Code 即可加入點歌，無需安裝任何 App，支援多人同時使用。',
+        f2_title: 'AI 自動建立歌庫',
+        f2_desc: '播放 2 分鐘後 AI 自動分析歌手、語言及年代，建立可瀏覽的本地歌庫（需 AI API Key）。',
+        f3_title: '大屏電視播放',
+        f3_desc: '電視畫面支援 Android TV APK，透過本地 WiFi 實現大屏播放，音質畫質由 YouTube 保證。',
+        f4_title: '資料完全私有',
+        f4_desc: 'Node.js 本地伺服器，所有歌單資料只存在您自己的設備，不上傳任何資訊。',
+        f5_title: '完整播放控制',
+        f5_desc: '支援插播、調音量、上下首、重播，所有操作即時同步到電視。',
+        f6_title: '跨平台支援',
+        f6_desc: '支援 Mac / Windows / Linux，只需安裝 Node.js 即可運行，無需其他依賴。',
+        disclaimer_label: '法律聲明',
+        disclaimer_title: '免責聲明',
+        meta_title: 'KaraQueue — 本地 WiFi KTV 點歌系統 | Milestone Technology',
+      },
+      en: {
+        back_home: '← Back to Home',
+        hero_sub: 'Local WiFi KTV Song Request System',
+        hero_desc: 'Free open-source tool. Scan QR with your phone to request songs, big-screen TV playback, AI-powered artist library, no monthly fees, self-hosted.',
+        btn_github: 'GitHub Source / Download',
+        btn_download: 'Free Download',
+        features_label: 'Features',
+        features_title: 'Easy Setup, Start Singing Now',
+        f1_title: 'Scan & Request via Mobile',
+        f1_desc: 'Scan QR Code to request songs — no app installation required, supports multiple users simultaneously.',
+        f2_title: 'AI-Powered Song Library',
+        f2_desc: 'After 2 minutes of playback, AI auto-analyzes artist, language & era to build a browsable local library (requires AI API Key).',
+        f3_title: 'Big-Screen TV Playback',
+        f3_desc: 'TV display supports Android TV APK via local WiFi for big-screen playback, with YouTube-guaranteed audio and video quality.',
+        f4_title: 'Fully Private Data',
+        f4_desc: 'Node.js local server — all playlist data stays on your device only, nothing is uploaded.',
+        f5_title: 'Full Playback Control',
+        f5_desc: 'Supports inserting songs, volume control, next/previous, and replay — all controls sync to TV in real time.',
+        f6_title: 'Cross-Platform Support',
+        f6_desc: 'Supports Mac / Windows / Linux — just install Node.js, no other dependencies required.',
+        disclaimer_label: 'Legal Notice',
+        disclaimer_title: 'Disclaimer',
+        meta_title: 'KaraQueue — Local WiFi KTV Song Request System | Milestone Technology',
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'zh';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant-HK';
+      document.title = translations[lang].meta_title;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key] !== undefined) {
+          el.textContent = translations[lang][key];
+        }
+      });
+
+      document.getElementById('disclaimer-zh').style.display = lang === 'zh' ? '' : 'none';
+      document.getElementById('disclaimer-en').style.display = lang === 'en' ? '' : 'none';
+      document.getElementById('agree-label-zh').style.display = lang === 'zh' ? '' : 'none';
+      document.getElementById('agree-label-en').style.display = lang === 'en' ? '' : 'none';
+
+      document.querySelectorAll('.lang-zh-label').forEach(el => {
+        el.style.fontWeight = lang === 'zh' ? '700' : '400';
+        el.style.color = lang === 'zh' ? 'hsl(213,32%,12%)' : 'hsl(213,10%,60%)';
+      });
+      document.querySelectorAll('.lang-en-label').forEach(el => {
+        el.style.fontWeight = lang === 'en' ? '700' : '400';
+        el.style.color = lang === 'en' ? 'hsl(213,32%,12%)' : 'hsl(213,10%,60%)';
+      });
+    }
+
+    function setDownloadEnabled(enabled) {
+      const btns = document.getElementById('download-btns');
+      btns.classList.toggle('opacity-40', !enabled);
+      btns.classList.toggle('pointer-events-none', !enabled);
+    }
+
+    function toggleLang() {
+      setLanguage(currentLang === 'zh' ? 'en' : 'zh');
+    }
+
+    setLanguage(currentLang);
+  </script>
 
 </body>
 </html>

@@ -28,6 +28,8 @@
   .status-box p { margin: 4px 0; font-size: 14px; color: #3c3c43; }
   .status-box p.bold { font-weight: 600; color: #1c1c1e; }
   .error { color: #ff3b30; font-size: 13px; margin-top: 8px; display: none; }
+  .footer { margin-top: 32px; text-align: center; font-size: 12px; color: #aeaeb2; }
+  .footer a { color: #aeaeb2; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -39,9 +41,9 @@
   </div>
 
   <div id="formSection">
-    <label for="username">登入名稱</label>
-    <input type="text" id="username" placeholder="輸入您的用戶名" autocomplete="username"
-           autocapitalize="none" autocorrect="off" spellcheck="false">
+    <label for="username">香港手機號碼</label>
+    <input type="tel" id="username" placeholder="例：9XXXXXXX" autocomplete="tel"
+           autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="8" inputmode="numeric">
     <p class="error" id="errMsg"></p>
     <button class="btn" id="submitBtn" onclick="register()">登記裝置</button>
   </div>
@@ -53,6 +55,7 @@
     <p style="margin-top:12px; color:#8e8e93; font-size:12px">此頁面會自動更新</p>
   </div>
 </div>
+<div class="footer">Powered by <a href="https://hkmilestone.com">Milestone Technology</a></div>
 
 <script>
 const UUID_KEY = 'portal_device_uuid';
@@ -83,7 +86,11 @@ async function register() {
   const btn = document.getElementById('submitBtn');
   err.style.display = 'none';
 
-  if (!username) { err.textContent = '請輸入用戶名稱'; err.style.display = 'block'; return; }
+  if (!username) { err.textContent = '請輸入香港手機號碼'; err.style.display = 'block'; return; }
+  if (!/^[2569]\d{7}$/.test(username)) {
+    err.textContent = '請輸入有效的香港手機號碼（8位數字，以2、5、6或9開頭）';
+    err.style.display = 'block'; return;
+  }
 
   btn.disabled = true;
   btn.textContent = '登記中…';

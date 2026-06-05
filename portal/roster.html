@@ -70,7 +70,13 @@
              border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .pushed-at { font-size: 12px; color: #8e8e93; text-align: right; padding: 0 4px 16px; }
+  .pushed-at { font-size: 12px; color: #8e8e93; text-align: right; padding: 0 4px 4px; }
+  .footer { font-size: 12px; color: #aeaeb2; text-align: center; padding: 8px 4px 24px; }
+  .footer a { color: #aeaeb2; text-decoration: none; }
+  .day-card.today { border: 2px solid #007aff; }
+  .day-card.today .day-header { background: #f0f7ff; }
+  .today-badge { background: #007aff; color: #fff; font-size: 11px; font-weight: 600;
+                 padding: 2px 7px; border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -176,23 +182,40 @@ function renderRoster(data) {
     (leavesByDate[l.date] = leavesByDate[l.date] || []).push(l);
   });
 
+  const todayStr = new Date().toISOString().slice(0, 10);
   let html = '';
 
   dates.forEach(dateStr => {
     const entries = entriesByDate[dateStr] || [];
     const leaves = leavesByDate[dateStr] || [];
-    if (!entries.length && !leaves.length) return;
+    const isToday = dateStr === todayStr;
+    if (!entries.length && !leaves.length) {
+      if (isToday) {
+        html += `<div class="day-card today">
+          <div class="day-header">
+            <div class="date-line">
+              <span class="day-name">今日</span>
+              <span class="today-badge">今日</span>
+            </div>
+          </div>
+          <div class="empty" style="padding:20px 16px"><p style="margin:0;color:#8e8e93;font-size:14px">今日沒有更期記錄</p></div>
+        </div>`;
+      }
+      return;
+    }
 
     const d = new Date(dateStr + 'T00:00:00');
     const dayName = DAY_NAMES[d.getDay()];
     const holiday = holidays[dateStr];
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
+    const todayBadge = isToday ? '<span class="today-badge">今日</span>' : '';
 
-    html += `<div class="day-card">
+    html += `<div class="day-card${isToday ? ' today' : ''}">
       <div class="day-header">
         <div class="date-line">
           <span class="day-name">（${dayName}）${mm}/${dd}</span>
+          ${todayBadge}
           ${holiday ? `<span class="holiday-badge">${holiday}</span>` : ''}
         </div>
       </div>`;
@@ -226,7 +249,9 @@ function renderRoster(data) {
   });
 
   if (!html) html = '<div class="empty"><div class="icon">😴</div><p>本週沒有更期記錄</p></div>';
-  html += `<div class="pushed-at">更新時間：${(data.pushed_at || '').replace('T', ' ')}</div>`;
+  const pushedAt = (data.pushed_at || '').replace('T', ' ').slice(0, 16);
+  html += `<div class="pushed-at">最後更新：${pushedAt || '—'}</div>`;
+  html += `<div class="footer">Powered by <a href="https://hkmilestone.com">Milestone Technology</a></div>`;
 
   document.getElementById('content').innerHTML = html;
 }

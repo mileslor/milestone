@@ -15,6 +15,9 @@
   p { font-size: 15px; color: #3c3c43; line-height: 1.5; margin: 0 0 24px; }
   .btn { display: inline-block; padding: 14px 32px; background: #007aff; color: #fff; border: none;
          border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .timestamp { font-size: 13px; color: #8e8e93; margin: 0 0 24px; }
+  .footer { margin-top: 32px; font-size: 12px; color: #aeaeb2; }
+  .footer a { color: #aeaeb2; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -22,10 +25,16 @@
   <div class="icon">🔒</div>
   <h1>裝置授權已過期</h1>
   <p>您的裝置授權已過期或被撤銷，請返回中心由管理員續期。</p>
+  <p class="timestamp" id="expiredAt"></p>
   <a class="btn" href="/portal/register.html">重新登記</a>
 </div>
+<div class="footer">Powered by <a href="https://hkmilestone.com">Milestone Technology</a></div>
 <script>
-  // Clear expired token
+  const expiresAt = localStorage.getItem('portal_token_expires');
+  if (expiresAt) {
+    const ts = expiresAt.replace('T', ' ').slice(0, 16);
+    document.getElementById('expiredAt').textContent = '授權到期時間：' + ts;
+  }
   localStorage.removeItem('portal_device_token');
   localStorage.removeItem('portal_token_expires');
 </script>

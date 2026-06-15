@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexusChat — 多帳號即時通訊 | Milestone Technology</title>
+  <meta name="description" content="一個 App，管理所有 WhatsApp、Telegram、Messenger 帳號。支援 Mac 及 Windows，自動更新，免費下載。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'Noto Sans HK', 'system-ui', 'sans-serif'] },
+          colors: {
+            background: 'hsl(210, 20%, 98%)',
+            foreground: 'hsl(213, 32%, 12%)',
+            card: { DEFAULT: 'hsl(0, 0%, 100%)', foreground: 'hsl(213, 32%, 12%)' },
+            primary: { DEFAULT: 'hsl(213, 80%, 18%)', foreground: 'hsl(210, 20%, 98%)' },
+            muted: { DEFAULT: 'hsl(210, 16%, 93%)', foreground: 'hsl(213, 10%, 46%)' },
+            accent: { DEFAULT: 'hsl(211, 100%, 50%)', foreground: 'hsl(0, 0%, 100%)' },
+            border: 'hsl(214, 20%, 88%)',
+            purple: { 600: '#7c3aed', 700: '#6d28d9', 100: '#ede9fe', 800: '#5b21b6' },
+          },
+          borderRadius: { lg: '0.625rem', xl: '0.875rem', '2xl': '1rem' },
+        },
+      },
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    *, *::before, *::after { border-color: hsl(214, 20%, 88%); }
+    .hero-gradient { background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #2d1b69 100%); }
+    .app-icon {
+      width: 96px; height: 96px;
+      background: linear-gradient(135deg, #2d1b69, #7c3aed);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; font-weight: 900; color: white;
+      box-shadow: 0 20px 48px rgba(124,58,237,0.45);
+    }
+    .dl-btn { transition: all 0.15s ease; }
+    .dl-btn:hover { transform: translateY(-2px); }
+    .feature-icon { font-size: 28px; }
+  </style>
+</head>
+<body class="font-sans antialiased bg-background text-foreground">
+
+  <!-- Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <a href="/" class="flex items-center gap-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <span class="text-sm font-bold text-primary-foreground tracking-tight">M</span>
+        </div>
+        <span class="text-lg font-bold tracking-tight text-foreground">Milestone</span>
+      </a>
+      <a href="/" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">← 返回主頁</a>
+    </div>
+  </header>
+
+  <main class="pt-20">
+
+    <!-- Hero -->
+    <section class="hero-gradient py-24 text-white">
+      <div class="mx-auto max-w-4xl px-6 text-center">
+        <div class="app-icon mx-auto mb-8">N</div>
+        <h1 class="mb-4 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">NexusChat</h1>
+        <p class="mx-auto mb-10 max-w-xl text-lg leading-relaxed" style="color:rgba(255,255,255,0.75)">
+          一個 App，管理所有 WhatsApp、Telegram 及 Messenger 帳號。告別多個視窗切換，帳號獨立隔離，安全可靠。
+        </p>
+
+        <!-- Download buttons -->
+        <div id="download" class="flex flex-wrap justify-center gap-4 mb-6">
+          <a id="btn-mac" href="https://github.com/mileslor/nexus-chat/releases/latest/download/NexusChat.dmg"
+             class="dl-btn inline-flex items-center gap-3 rounded-xl bg-white px-6 py-4 text-sm font-bold text-purple-700 shadow-lg hover:shadow-xl">
+            <span class="text-2xl"></span>
+            <span class="text-left">
+              <span class="block text-xs font-normal text-purple-600">Download for</span>
+              macOS
+            </span>
+          </a>
+          <a id="btn-win" href="https://github.com/mileslor/nexus-chat/releases/latest/download/NexusChatSetup.exe"
+             class="dl-btn inline-flex items-center gap-3 rounded-xl px-6 py-4 text-sm font-bold text-white shadow-lg hover:shadow-xl" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2)">
+            <span class="text-2xl">🖥</span>
+            <span class="text-left">
+              <span class="block text-xs font-normal" style="color:rgba(255,255,255,0.6)">Download for</span>
+              Windows
+            </span>
+          </a>
+        </div>
+        <p class="text-xs" style="color:rgba(255,255,255,0.45)">Version 1.0.0 · macOS 12+ · Windows 10+ · 免費下載</p>
+
+        <!-- Platform chips -->
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium" style="background:rgba(255,255,255,0.1)">💬 WhatsApp</span>
+          <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium" style="background:rgba(255,255,255,0.1)">✈️ Telegram</span>
+          <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium" style="background:rgba(255,255,255,0.1)">⚡ Messenger</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-24 bg-background">
+      <div class="mx-auto max-w-5xl px-6">
+        <h2 class="mb-4 text-center text-3xl font-bold tracking-tight">為什麼選擇 NexusChat？</h2>
+        <p class="mb-16 text-center text-muted-foreground">專為同時使用多個即時通訊帳號的用戶設計</p>
+
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div class="feature-icon mb-3">👥</div>
+            <h3 class="mb-2 font-semibold">多帳號同時在線</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">工作、私人帳號同時在線，一鍵切換。各帳號完全獨立 Cookie 及 Session，互不干擾。</p>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div class="feature-icon mb-3">🔔</div>
+            <h3 class="mb-2 font-semibold">統一通知管理</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">所有帳號新訊息統一顯示系統通知，Dock / 工作列 badge 顯示未讀總數，一目了然。</p>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div class="feature-icon mb-3">🔄</div>
+            <h3 class="mb-2 font-semibold">自動斷線重連</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">網絡不穩時自動重連，無需手動刷新，確保持續在線。重連狀態即時顯示。</p>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div class="feature-icon mb-3">🌙</div>
+            <h3 class="mb-2 font-semibold">原生深色介面</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">全原生深色模式設計，護眼舒適。記憶視窗大小及位置，每次開啟回到上次狀態。</p>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div class="feature-icon mb-3">⚡</div>
+            <h3 class="mb-2 font-semibold">自動背景更新</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">背景自動偵測並下載最新版本，無需手動更新，確保功能及安全性持續跟進。</p>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div class="feature-icon mb-3">🔒</div>
+            <h3 class="mb-2 font-semibold">本地資料安全</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">所有登入 Session 儲存於本機，不上傳任何個人資料至第三方伺服器。</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Install guide -->
+    <section class="py-16 bg-muted/30">
+      <div class="mx-auto max-w-3xl px-6">
+        <h2 class="mb-10 text-center text-2xl font-bold tracking-tight">安裝說明</h2>
+        <div class="grid gap-6 md:grid-cols-2">
+
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 flex items-center gap-3">
+              <span class="text-2xl"></span>
+              <h3 class="font-semibold">macOS</h3>
+            </div>
+            <ol class="space-y-2 text-sm text-muted-foreground">
+              <li class="flex gap-2"><span class="font-bold text-foreground">1.</span> 下載 NexusChat.dmg</li>
+              <li class="flex gap-2"><span class="font-bold text-foreground">2.</span> 打開 DMG，將 NexusChat 拖入 Applications</li>
+              <li class="flex gap-2"><span class="font-bold text-foreground">3.</span> 首次開啟：<strong class="text-foreground">右鍵點按 → 開啟</strong>（繞過 Gatekeeper）</li>
+              <li class="flex gap-2"><span class="font-bold text-foreground">4.</span> 之後正常雙擊開啟即可</li>
+            </ol>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <div class="mb-4 flex items-center gap-3">
+              <span class="text-2xl">🖥</span>
+              <h3 class="font-semibold">Windows</h3>
+            </div>
+            <ol class="space-y-2 text-sm text-muted-foreground">
+              <li class="flex gap-2"><span class="font-bold text-foreground">1.</span> 下載 NexusChatSetup.exe</li>
+              <li class="flex gap-2"><span class="font-bold text-foreground">2.</span> 執行安裝程式</li>
+              <li class="flex gap-2"><span class="font-bold text-foreground">3.</span> 若出現 SmartScreen 警告，點按「仍要執行」</li>
+              <li class="flex gap-2"><span class="font-bold text-foreground">4.</span> 安裝完成後自動啟動</li>
+            </ol>
+          </div>
+
+        </div>
+
+        <div class="mt-8 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+          <strong>⚠️ 注意：</strong> NexusChat 為獨立第三方應用程式，與 Meta、Telegram 或 Facebook 無關。使用本軟件前請自行評估相關平台服務條款。
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20" style="background:linear-gradient(135deg,#1e1b4b,#4c1d95)">
+      <div class="mx-auto max-w-2xl px-6 text-center">
+        <h2 class="mb-4 text-3xl font-bold text-white">立即免費下載</h2>
+        <p class="mb-8 text-base" style="color:rgba(255,255,255,0.7)">支援 macOS 及 Windows，自動更新，永久免費</p>
+        <a href="#download" class="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-bold text-purple-700 shadow-lg transition hover:shadow-xl hover:-translate-y-0.5">
+          ↑ 前往下載
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border py-10 bg-background">
+    <div class="mx-auto max-w-7xl px-6 text-center text-sm text-muted-foreground">
+      <p>NexusChat 係獨立第三方應用程式，與 Meta Platforms、Telegram 或 Facebook 無關聯。</p>
+      <p class="mt-2">© 2026 <a href="https://hkmilestone.com" class="text-accent hover:underline">Milestone Technology</a></p>
+    </div>
+  </footer>
+
+  <script>
+    const isMac = /Mac/.test(navigator.platform || navigator.userAgent);
+    if (!isMac) {
+      const w = document.getElementById('btn-win');
+      const m = document.getElementById('btn-mac');
+      w.style.background = 'white';
+      w.style.border = 'none';
+      w.style.color = '#6d28d9';
+      m.style.background = 'rgba(255,255,255,0.12)';
+      m.style.border = '1px solid rgba(255,255,255,0.2)';
+      m.style.color = 'white';
+    }
+  </script>
+</body>
+</html>

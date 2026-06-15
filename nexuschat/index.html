@@ -157,11 +157,11 @@
         <p class="mb-10 text-center text-muted-foreground">首次安裝需要額外一個步驟，請按以下指示操作</p>
 
         <!-- Warning banner -->
-        <div class="mb-10 flex gap-4 rounded-2xl border-2 border-orange-300 bg-orange-50 p-5">
-          <span class="mt-0.5 text-2xl flex-shrink-0">⚠️</span>
+        <div class="mb-8 flex gap-4 rounded-2xl border-2 border-red-300 bg-red-50 p-5">
+          <span class="mt-0.5 text-2xl flex-shrink-0">🚫</span>
           <div>
-            <p class="font-bold text-orange-900 mb-1">重要提示：直接雙擊開啟會彈出「無法開啟」錯誤</p>
-            <p class="text-sm text-orange-800">由於 NexusChat 暫未通過 Apple 公證，macOS 會阻止直接執行。請跟隨以下第 3 步，<strong>用右鍵方式開啟</strong>，只需做一次。</p>
+            <p class="font-bold text-red-900 mb-1">macOS 會顯示「App 已損壞」或「無法開啟」</p>
+            <p class="text-sm text-red-800">由於 NexusChat 未通過 Apple 收費公證，macOS 會封鎖。請跟隨以下步驟解除限制，<strong>只需做一次</strong>，之後正常使用。</p>
           </div>
         </div>
 
@@ -172,47 +172,38 @@
           <div class="flex gap-5 rounded-2xl border border-border bg-card p-6">
             <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">1</div>
             <div class="flex-1">
-              <h3 class="font-semibold mb-1">下載 NexusChat.dmg</h3>
-              <p class="text-sm text-muted-foreground">按上方「Download for macOS」按鈕，下載完成後在 Downloads 資料夾可以找到 <code class="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">NexusChat.dmg</code></p>
+              <h3 class="font-semibold mb-1">下載並安裝</h3>
+              <p class="text-sm text-muted-foreground">下載 <code class="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">NexusChat.dmg</code>，打開後將 NexusChat 圖示拖入 Applications 資料夾</p>
             </div>
           </div>
 
-          <!-- Step 2 -->
-          <div class="flex gap-5 rounded-2xl border border-border bg-card p-6">
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">2</div>
-            <div class="flex-1">
-              <h3 class="font-semibold mb-1">打開 DMG，將 App 拖入 Applications</h3>
-              <p class="text-sm text-muted-foreground mb-3">雙擊 <code class="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">NexusChat.dmg</code> 開啟，將 <strong>NexusChat 圖示</strong>拖到 <strong>Applications 資料夾</strong>圖示上</p>
-              <div class="flex items-center gap-3 rounded-xl bg-muted/60 px-4 py-3 text-sm">
-                <span class="text-3xl">📦</span>
-                <svg class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                <span class="text-3xl">📁</span>
-                <span class="text-muted-foreground">Applications</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 3 - highlighted -->
+          <!-- Step 3 - Terminal method (most reliable) -->
           <div class="flex gap-5 rounded-2xl border-2 border-accent bg-accent/5 p-6">
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-white font-bold text-lg">3</div>
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-white font-bold text-lg">2</div>
             <div class="flex-1">
-              <h3 class="font-semibold mb-1 text-accent">🔑 關鍵步驟：用右鍵開啟（只需做一次）</h3>
-              <p class="text-sm text-muted-foreground mb-4">去 Applications 資料夾，找到 NexusChat，<strong class="text-foreground">切勿雙擊</strong>，請：</p>
+              <h3 class="font-semibold mb-3 text-accent">🔑 解除封鎖（必做）</h3>
               <div class="space-y-3">
-                <div class="flex items-start gap-3 rounded-xl bg-white border border-border p-4">
-                  <span class="flex-shrink-0 font-bold text-accent text-sm mt-0.5">方法一</span>
-                  <div class="text-sm">
-                    <p class="font-medium mb-1">右鍵點按圖示</p>
-                    <p class="text-muted-foreground">在 NexusChat 圖示上按右鍵（或 Control + 點按）→ 選擇選單最頂的「<strong class="text-foreground">開啟</strong>」</p>
+
+                <div class="rounded-xl bg-white border border-border p-4">
+                  <p class="font-medium text-sm mb-2">✅ 最可靠方法 — Terminal 指令</p>
+                  <p class="text-sm text-muted-foreground mb-3">打開 Terminal（Spotlight 搜尋「Terminal」），貼上以下指令並按 Enter：</p>
+                  <div class="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-3">
+                    <code class="flex-1 text-sm text-green-400 font-mono">xattr -cr /Applications/NexusChat.app</code>
+                    <button onclick="navigator.clipboard.writeText('xattr -cr /Applications/NexusChat.app')" class="flex-shrink-0 rounded px-2 py-1 text-xs text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">複製</button>
                   </div>
+                  <p class="text-xs text-muted-foreground mt-2">指令完成後（沒有任何輸出是正常的），直接雙擊 NexusChat 開啟即可</p>
                 </div>
-                <div class="flex items-start gap-3 rounded-xl bg-white border border-border p-4">
-                  <span class="flex-shrink-0 font-bold text-accent text-sm mt-0.5">方法二</span>
-                  <div class="text-sm">
-                    <p class="font-medium mb-1">系統設定解鎖</p>
-                    <p class="text-muted-foreground">如彈出「無法驗證」視窗 → 去「<strong class="text-foreground">系統設定 → 私隱與安全性</strong>」→ 頁面底部按「<strong class="text-foreground">仍要開啟</strong>」</p>
-                  </div>
+
+                <div class="rounded-xl bg-white border border-border p-4">
+                  <p class="font-medium text-sm mb-2">方法二 — 右鍵開啟</p>
+                  <p class="text-sm text-muted-foreground">在 Applications 找到 NexusChat → <strong class="text-foreground">右鍵點按</strong>（或 Control + 點按）→ 選「<strong class="text-foreground">開啟</strong>」→ 彈出視窗再按「開啟」確認</p>
                 </div>
+
+                <div class="rounded-xl bg-white border border-border p-4">
+                  <p class="font-medium text-sm mb-2">方法三 — 系統設定</p>
+                  <p class="text-sm text-muted-foreground">先嘗試雙擊開啟（即使失敗）→ 去「<strong class="text-foreground">系統設定 → 私隱與安全性</strong>」→ 頁底找到 NexusChat 相關提示 → 按「<strong class="text-foreground">仍要開啟</strong>」</p>
+                </div>
+
               </div>
             </div>
           </div>
@@ -222,7 +213,7 @@
             <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-white font-bold text-lg">✓</div>
             <div class="flex-1">
               <h3 class="font-semibold mb-1 text-green-700">完成！之後正常使用</h3>
-              <p class="text-sm text-muted-foreground">確認開啟後，NexusChat 會正常啟動。之後每次<strong class="text-foreground">直接雙擊</strong>開啟即可，不需要再做右鍵步驟。App 亦會隨開機自動啟動。</p>
+              <p class="text-sm text-muted-foreground">解除封鎖後，NexusChat 會正常啟動。之後每次<strong class="text-foreground">直接雙擊</strong>開啟即可。App 會隨開機自動啟動，並在背景自動更新。</p>
             </div>
           </div>
 

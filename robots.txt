@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /portal/
+Disallow: /karaqueue.html
+Disallow: /token-monitor/
+Disallow: /nexuschat/
+Disallow: /lwrc-payment/
+
+Sitemap: https://hkmilestone.com/sitemap.xml

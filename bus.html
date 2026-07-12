@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BusETA — 巴士到站時間 | Milestone Technology</title>
+  <meta name="description" content="免費巴士到站時間查詢工具，自行搜尋並加入常用巴士站，實時顯示到站時間，支援深色模式，適合裝喺舊手機、平板做擺設。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+HK:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'Noto Sans HK', 'system-ui', 'sans-serif'] },
+          colors: {
+            background: 'hsl(210, 20%, 98%)',
+            foreground: 'hsl(213, 32%, 12%)',
+            card: { DEFAULT: 'hsl(0, 0%, 100%)', foreground: 'hsl(213, 32%, 12%)' },
+            primary: { DEFAULT: 'hsl(213, 80%, 18%)', foreground: 'hsl(210, 20%, 98%)' },
+            muted: { DEFAULT: 'hsl(210, 16%, 93%)', foreground: 'hsl(213, 10%, 46%)' },
+            accent: { DEFAULT: 'hsl(211, 100%, 50%)', foreground: 'hsl(0, 0%, 100%)' },
+            border: 'hsl(214, 20%, 88%)',
+          },
+          borderRadius: { lg: '0.625rem', xl: '0.875rem', '2xl': '1rem' },
+        },
+      },
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .dark body { background: hsl(222, 30%, 8%); color: hsl(210, 20%, 92%); }
+    .dark .card-surface { background: hsl(222, 26%, 12%); border-color: hsl(222, 18%, 20%); }
+    .dark .muted-surface { background: hsl(222, 22%, 16%); border-color: hsl(222, 18%, 22%); }
+    .dark .text-muted-foreground { color: hsl(215, 12%, 62%) !important; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: hsl(214, 20%, 80%); border-radius: 999px; }
+    .dark ::-webkit-scrollbar-thumb { background: hsl(222, 18%, 28%); }
+    .eta-pill { font-variant-numeric: tabular-nums; }
+    .clock-font { font-variant-numeric: tabular-nums; }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .live-dot { animation: pulse-dot 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="font-sans antialiased bg-background text-foreground min-h-screen">
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-transparent backdrop-blur-md border-b border-border">
+    <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+      <a href="/" class="flex items-center gap-2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+          <span class="text-xs font-bold text-primary-foreground tracking-tight">M</span>
+        </div>
+        <span class="text-base font-bold tracking-tight">Milestone</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <button id="theme-toggle" onclick="toggleTheme()" title="切換深色/淺色" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-sm transition-colors hover:border-foreground">🌙</button>
+        <a href="/" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">← 返回主頁</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+
+    <!-- Clock + status -->
+    <div class="mb-6 flex items-center justify-between rounded-2xl border border-border card-surface bg-card px-5 py-4">
+      <div>
+        <div id="clock" class="clock-font text-3xl font-bold tracking-tight sm:text-4xl">--:--:--</div>
+        <div id="date-str" class="text-sm text-muted-foreground mt-0.5">--</div>
+      </div>
+      <div class="text-right text-xs text-muted-foreground">
+        <div class="flex items-center justify-end gap-1.5">
+          <span id="refresh-dot" class="live-dot h-2 w-2 rounded-full bg-accent"></span>
+          <span id="refresh-status">實時更新中</span>
+        </div>
+        <div class="mt-1">每 30 秒自動更新</div>
+      </div>
+    </div>
+
+    <!-- My stops grid (each tile = one chosen region/company/stop) -->
+    <div id="my-stops" class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4"></div>
+
+    <div id="empty-state" class="mb-4 rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground hidden">
+      <div class="mb-3 text-4xl">🚌</div>
+      <p class="text-sm">未加入任何格仔，撳下面「+ 加新格」揀地區、公司同車站。</p>
+    </div>
+
+    <!-- Add-tile picker -->
+    <div class="rounded-2xl border border-border card-surface bg-card p-5">
+      <button id="add-tile-btn" type="button" onclick="openPicker()" class="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm font-semibold text-muted-foreground transition-colors hover:border-accent hover:text-accent">
+        <span class="text-lg leading-none">＋</span> 加新格
+      </button>
+
+      <div id="picker-panel" class="mt-4 hidden">
+        <!-- Step 1: region -->
+        <div id="picker-step-region">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-semibold">1. 揀地區</span>
+            <button type="button" onclick="closePicker()" class="text-xs text-muted-foreground hover:text-foreground">取消</button>
+          </div>
+          <div id="region-list" class="grid grid-cols-2 gap-3"></div>
+        </div>
+
+        <!-- Step 2: company -->
+        <div id="picker-step-company" class="hidden">
+          <div class="mb-3 flex items-center justify-between">
+            <button type="button" onclick="backToRegion()" class="text-xs text-muted-foreground hover:text-foreground">← 返回</button>
+            <span class="text-sm font-semibold" id="company-step-title">2. 揀公司／路線種類</span>
+            <button type="button" onclick="closePicker()" class="text-xs text-muted-foreground hover:text-foreground">取消</button>
+          </div>
+          <div id="company-list" class="grid grid-cols-2 gap-3"></div>
+          <div id="company-unavailable-note" class="mt-3 hidden rounded-lg muted-surface bg-muted p-3 text-xs text-muted-foreground"></div>
+        </div>
+
+        <!-- Step 3: stop search -->
+        <div id="picker-step-search" class="hidden">
+          <div class="mb-3 flex items-center justify-between">
+            <button type="button" onclick="backToCompany()" class="text-xs text-muted-foreground hover:text-foreground">← 返回</button>
+            <span class="text-sm font-semibold">3. 搜尋車站</span>
+            <button type="button" onclick="closePicker()" class="text-xs text-muted-foreground hover:text-foreground">取消</button>
+          </div>
+          <div class="relative">
+            <input id="search-input" type="text" placeholder="輸入車站名稱，例如：旺角、彌敦道、Central..."
+              class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent"
+              autocomplete="off" />
+            <div id="search-loading" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hidden">載入車站資料中...</div>
+          </div>
+          <div id="search-results" class="mt-2 max-h-72 overflow-y-auto rounded-lg border border-border hidden divide-y divide-border"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-border py-8 text-center text-xs text-muted-foreground">
+    <p>資料來源：運輸署 KMB ETA 開放數據 (data.etabus.gov.hk)。實時資料僅供參考，以車站現場顯示為準。</p>
+    <p class="mt-1"><a href="/" class="hover:text-foreground transition-colors">hkmilestone.com</a></p>
+  </footer>
+
+  <script>
+    // ---------- Theme ----------
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      document.getElementById('theme-toggle').textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    function toggleTheme() {
+      const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem('bus_theme', next);
+      applyTheme(next);
+    }
+    applyTheme(localStorage.getItem('bus_theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+    // ---------- Clock ----------
+    function tickClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('zh-HK', { hour12: false });
+      document.getElementById('date-str').textContent = now.toLocaleDateString('zh-HK', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    // ---------- Provider abstraction (extensible for future companies/countries) ----------
+    // Each provider implements: loadStopIndex(), searchStops(query), fetchEta(stopId)
+    const Providers = {};
+
+    Providers.KMB = {
+      id: 'KMB',
+      label: '九巴 KMB',
+      _stopIndex: null,
+      _loading: null,
+      async loadStopIndex() {
+        if (this._stopIndex) return this._stopIndex;
+        if (this._loading) return this._loading;
+        this._loading = fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop')
+          .then(r => r.json())
+          .then(json => {
+            this._stopIndex = json.data;
+            return this._stopIndex;
+          });
+        return this._loading;
+      },
+      async searchStops(query) {
+        const index = await this.loadStopIndex();
+        const q = query.trim().toLowerCase();
+        if (!q) return [];
+        return index
+          .filter(s => s.name_tc.toLowerCase().includes(q) || s.name_en.toLowerCase().includes(q) || s.name_sc.toLowerCase().includes(q))
+          .slice(0, 30)
+          .map(s => ({ providerId: 'KMB', stopId: s.stop, nameTc: s.name_tc, nameEn: s.name_en }));
+      },
+      async fetchEta(stopId) {
+        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${stopId}`);
+        const json = await res.json();
+        return (json.data || [])
+          .filter(e => e.eta)
+          .map(e => ({
+            route: e.route,
+            dir: e.dir,
+            dest: e.dest_tc,
+            etaTime: e.eta,
+            remark: e.rmk_tc || '',
+          }))
+          .sort((a, b) => (a.route === b.route ? a.etaTime.localeCompare(b.etaTime) : a.route.localeCompare(b.route, 'zh-Hant', { numeric: true })));
+      },
+    };
+
+    // ---------- Region / company catalogue (drives the add-tile picker) ----------
+    // "available: false" entries render as disabled with an explanation — this is how
+    // future regions/companies (Manchester bus via BODS, Metrolink, Citybus...) get slotted in.
+    const REGIONS = [
+      {
+        id: 'hk', label: '香港', flag: '🇭🇰', available: true,
+        companies: [
+          { id: 'KMB', label: '九巴 KMB', available: true },
+          { id: 'CTB', label: '城巴 Citybus', available: false, note: '城巴／新巴開放數據暫未整合，陸續加入中。' },
+        ],
+      },
+      {
+        id: 'manchester', label: '曼徹斯特', flag: '🇬🇧', available: true,
+        companies: [
+          { id: 'BEE_BUS', label: 'Bee Network 巴士', available: false, note: 'TfGM 官方即時數據 Portal 已停止接受新申請（"no longer in operation"），暫時未有替代途徑取得車站到站時間，等 TfGM 出新方案或改用英國 Bus Open Data Service 先可以做。' },
+          { id: 'METROLINK', label: 'Metrolink 輕鐵', available: false, note: '同樣受 TfGM API 停止新申請影響，暫時未有公開途徑攞到 Metrolink 實時到站時間。' },
+        ],
+      },
+    ];
+
+    // ---------- Picker state machine ----------
+    let pickerRegion = null;
+    let pickerCompany = null;
+
+    function openPicker() {
+      document.getElementById('add-tile-btn').classList.add('hidden');
+      document.getElementById('picker-panel').classList.remove('hidden');
+      showRegionStep();
+    }
+    function closePicker() {
+      document.getElementById('add-tile-btn').classList.remove('hidden');
+      document.getElementById('picker-panel').classList.add('hidden');
+      pickerRegion = null;
+      pickerCompany = null;
+      searchInput.value = '';
+      searchResults.classList.add('hidden');
+      searchResults.innerHTML = '';
+    }
+    function showRegionStep() {
+      document.getElementById('picker-step-region').classList.remove('hidden');
+      document.getElementById('picker-step-company').classList.add('hidden');
+      document.getElementById('picker-step-search').classList.add('hidden');
+      const list = document.getElementById('region-list');
+      list.innerHTML = REGIONS.map(r => `
+        <button type="button" data-region="${r.id}" class="rounded-xl border border-border p-4 text-left transition-colors hover:border-accent">
+          <div class="text-2xl mb-1">${r.flag}</div>
+          <div class="text-sm font-semibold">${escapeHtml(r.label)}</div>
+        </button>
+      `).join('');
+      list.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => selectRegion(btn.dataset.region));
+      });
+    }
+    function selectRegion(regionId) {
+      pickerRegion = REGIONS.find(r => r.id === regionId);
+      document.getElementById('picker-step-region').classList.add('hidden');
+      document.getElementById('picker-step-company').classList.remove('hidden');
+      document.getElementById('company-step-title').textContent = `2. 揀公司／路線種類（${pickerRegion.label}）`;
+      const list = document.getElementById('company-list');
+      const note = document.getElementById('company-unavailable-note');
+      note.classList.add('hidden');
+      list.innerHTML = pickerRegion.companies.map(c => `
+        <button type="button" data-company="${c.id}"
+          class="rounded-xl border p-4 text-left transition-colors ${c.available ? 'border-border hover:border-accent' : 'border-border opacity-50 cursor-not-allowed'}">
+          <div class="text-sm font-semibold">${escapeHtml(c.label)}</div>
+          <div class="mt-1 text-xs text-muted-foreground">${c.available ? '可用' : '暫時未能提供'}</div>
+        </button>
+      `).join('');
+      list.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const company = pickerRegion.companies.find(c => c.id === btn.dataset.company);
+          if (!company.available) {
+            note.textContent = 'ℹ️ ' + company.note;
+            note.classList.remove('hidden');
+            return;
+          }
+          selectCompany(company);
+        });
+      });
+    }
+    function selectCompany(company) {
+      pickerCompany = company;
+      document.getElementById('picker-step-company').classList.add('hidden');
+      document.getElementById('picker-step-search').classList.remove('hidden');
+      searchInput.value = '';
+      searchInput.focus();
+    }
+    function backToRegion() {
+      pickerCompany = null;
+      document.getElementById('picker-step-company').classList.add('hidden');
+      document.getElementById('picker-step-region').classList.remove('hidden');
+    }
+    function backToCompany() {
+      document.getElementById('picker-step-search').classList.add('hidden');
+      selectRegion(pickerRegion.id);
+    }
+
+    // ---------- Search UI (step 3 of picker) ----------
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    const searchLoading = document.getElementById('search-loading');
+    let searchDebounce = null;
+
+    searchInput.addEventListener('focus', () => {
+      if (!pickerCompany) return;
+      searchLoading.classList.remove('hidden');
+      Providers[pickerCompany.id].loadStopIndex().finally(() => searchLoading.classList.add('hidden'));
+    });
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchDebounce);
+      const q = searchInput.value;
+      if (!q.trim() || !pickerCompany) {
+        searchResults.classList.add('hidden');
+        searchResults.innerHTML = '';
+        return;
+      }
+      searchDebounce = setTimeout(async () => {
+        const results = await Providers[pickerCompany.id].searchStops(q);
+        renderSearchResults(results);
+      }, 200);
+    });
+
+    function renderSearchResults(results) {
+      if (!results.length) {
+        searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">搵唔到相關車站</div>';
+        searchResults.classList.remove('hidden');
+        return;
+      }
+      searchResults.innerHTML = results.map(r => `
+        <button type="button" class="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors flex items-center justify-between gap-2" data-provider="${r.providerId}" data-stop="${r.stopId}" data-name="${escapeHtml(r.nameTc)}">
+          <span>${escapeHtml(r.nameTc)}</span>
+          <span class="text-xs text-muted-foreground">${escapeHtml(r.nameEn)}</span>
+        </button>
+      `).join('');
+      searchResults.classList.remove('hidden');
+      searchResults.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          addStop(btn.dataset.provider, btn.dataset.stop, btn.dataset.name);
+          closePicker();
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ---------- My stops (persisted client-side, no login/backend needed) ----------
+    const STORAGE_KEY = 'bus_my_stops';
+    function getMyStops() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+    }
+    function saveMyStops(stops) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stops));
+    }
+    function addStop(providerId, stopId, name) {
+      const stops = getMyStops();
+      if (stops.some(s => s.providerId === providerId && s.stopId === stopId)) return;
+      stops.push({ providerId, stopId, name });
+      saveMyStops(stops);
+      renderMyStops();
+    }
+    function removeStop(providerId, stopId) {
+      saveMyStops(getMyStops().filter(s => !(s.providerId === providerId && s.stopId === stopId)));
+      renderMyStops();
+    }
+
+    function renderMyStops() {
+      const stops = getMyStops();
+      const container = document.getElementById('my-stops');
+      const emptyState = document.getElementById('empty-state');
+      if (!stops.length) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+      container.innerHTML = stops.map(s => `
+        <div class="rounded-2xl border border-border card-surface bg-card p-5" data-card-provider="${s.providerId}" data-card-stop="${s.stopId}">
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg">${escapeHtml(s.name)}</h3>
+              <span class="text-xs text-muted-foreground">${Providers[s.providerId]?.label || s.providerId}</span>
+            </div>
+            <button onclick="removeStop('${s.providerId}','${s.stopId}')" class="text-xs text-muted-foreground hover:text-red-500 transition-colors px-2 py-1">移除 ✕</button>
+          </div>
+          <div class="eta-list space-y-2 text-sm">
+            <div class="text-muted-foreground">載入中...</div>
+          </div>
+        </div>
+      `).join('');
+      stops.forEach(s => refreshStopEta(s));
+    }
+
+    async function refreshStopEta(stop) {
+      const card = document.querySelector(`[data-card-provider="${stop.providerId}"][data-card-stop="${stop.stopId}"]`);
+      if (!card) return;
+      const listEl = card.querySelector('.eta-list');
+      try {
+        const etas = await Providers[stop.providerId].fetchEta(stop.stopId);
+        if (!etas.length) {
+          listEl.innerHTML = '<div class="text-muted-foreground">暫無班次資料</div>';
+          return;
+        }
+        // group by route+dir, keep up to 3 nearest per route
+        const grouped = {};
+        etas.forEach(e => {
+          const key = e.route + '|' + e.dest;
+          (grouped[key] ||= []).push(e);
+        });
+        listEl.innerHTML = Object.entries(grouped).map(([key, arr]) => {
+          const [route, dest] = key.split('|');
+          const mins = arr.slice(0, 3).map(e => {
+            const diffMs = new Date(e.etaTime).getTime() - Date.now();
+            const diffMin = Math.round(diffMs / 60000);
+            if (diffMin <= 0) return '<span class="eta-pill inline-block rounded-full bg-accent text-white px-2.5 py-0.5 font-semibold">即將到達</span>';
+            return `<span class="eta-pill inline-block rounded-full muted-surface bg-muted px-2.5 py-0.5 font-medium">${diffMin} 分鐘</span>`;
+          }).join(' ');
+          return `
+            <div class="flex items-center justify-between gap-3 py-1">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="shrink-0 rounded bg-primary text-primary-foreground text-xs font-bold px-2 py-1">${escapeHtml(route)}</span>
+                <span class="truncate text-muted-foreground">往 ${escapeHtml(dest)}</span>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">${mins}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        listEl.innerHTML = '<div class="text-red-500">載入失敗，稍後重試</div>';
+      }
+    }
+
+    function refreshAllStops() {
+      const dot = document.getElementById('refresh-dot');
+      dot.style.background = '';
+      getMyStops().forEach(s => refreshStopEta(s));
+    }
+
+    // ---------- Init ----------
+    renderMyStops();
+    setInterval(refreshAllStops, 30000);
+
+    // close search results on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#search-input') && !e.target.closest('#search-results')) {
+        searchResults.classList.add('hidden');
+      }
+    });
+  </script>
+
+</body>
+</html>

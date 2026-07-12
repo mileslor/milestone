@@ -240,7 +240,8 @@
       _routesLoading: null,
       _routeStopIndex: null,
       _routeStopLoading: null,
-      _stopToRoutes: null, // Map stopId -> sorted [route codes], built from _routeStopIndex
+      _stopToRoutes: null, // Map stopId -> Set of route codes, built from _routeStopIndex
+      _stopToRouteBounds: null, // Map stopId -> Set of "route|bound", used to reconstruct route+dest when there's no live ETA
       async loadStopIndex() {
         if (this._stopIndex) return this._stopIndex;
         if (this._stopLoading) return this._stopLoading;
@@ -270,11 +271,15 @@
           .then(json => {
             this._routeStopIndex = json.data;
             const map = new Map();
+            const boundMap = new Map();
             for (const rs of this._routeStopIndex) {
               if (!map.has(rs.stop)) map.set(rs.stop, new Set());
               map.get(rs.stop).add(rs.route);
+              if (!boundMap.has(rs.stop)) boundMap.set(rs.stop, new Set());
+              boundMap.get(rs.stop).add(rs.route + '|' + rs.bound);
             }
             this._stopToRoutes = map;
+            this._stopToRouteBounds = boundMap;
             return this._routeStopIndex;
           })
           .catch(err => { this._routeStopLoading = null; throw err; });
@@ -283,6 +288,25 @@
       _routesPreviewFor(stopId) {
         const routeSet = this._stopToRoutes?.get(stopId);
         return routeSet ? Array.from(routeSet).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true })) : [];
+      },
+      // Fallback for when a stop has no live ETA right now (e.g. late night, between
+      // services): reconstruct the {route, dest} pairs it's scheduled to serve from the
+      // static route-stop + route-list data, using the same "route|dest" key shape as
+      // groupEtasByRoute so a tile added this way keeps working once buses reappear.
+      async getScheduledRoutesForStop(stopId) {
+        const [routes] = await Promise.all([this.loadRoutesList(), this.loadRouteStopIndex()]);
+        const pairs = this._stopToRouteBounds?.get(stopId);
+        if (!pairs || !pairs.size) return [];
+        const destByKey = new Map(routes.map(r => [r.route + '|' + r.bound, r.dest_tc]));
+        return Array.from(pairs)
+          .map(key => {
+            const dest = destByKey.get(key);
+            if (!dest) return null;
+            const [route] = key.split('|');
+            return { route, dest, key: route + '|' + dest };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.route.localeCompare(b.route, 'zh-Hant', { numeric: true }));
       },
       async searchStops(query) {
         // Route-number previews come from the (large, occasionally flaky) route-stop index,
@@ -510,13 +534,36 @@
       confirmBtn.disabled = true;
       list.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">載入路線資料中...</div>';
       try {
-        const etas = await Providers[providerId].fetchEta(stopId);
-        const groups = groupEtasByRoute(etas);
+        const provider = Providers[providerId];
+        const etas = await provider.fetchEta(stopId);
+        let groups = groupEtasByRoute(etas);
+        let usingSchedule = false;
+        if (!groups.length && provider.getScheduledRoutesForStop) {
+          // No buses running right now (late night, between services...) — fall back to
+          // the scheduled route list so the user can still set up the tile; ETAs will
+          // populate on their own once buses start running again.
+          try {
+            groups = await provider.getScheduledRoutesForStop(stopId);
+            usingSchedule = true;
+          } catch { /* fall through to the manual-add safety net below */ }
+        }
         if (!groups.length) {
-          list.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">呢個站暫無班次資料</div>';
+          list.innerHTML = `
+            <div class="px-4 py-3 text-sm text-muted-foreground">攞唔到呢個站嘅路線資料（可能而家冇車，或者路線資料未載好）。</div>
+            <button type="button" id="add-without-routes-btn" class="w-full px-4 py-2.5 text-left text-sm text-accent hover:bg-muted transition-colors font-medium">
+              ➕ 照樣加入呢個站（有車到會自動顯示全部路線）
+            </button>
+          `;
+          document.getElementById('add-without-routes-btn').addEventListener('click', () => {
+            addStop(pickerStop.providerId, pickerStop.stopId, pickerStop.name, null);
+            closePicker();
+          });
           return;
         }
-        list.innerHTML = groups.map(g => `
+        const scheduleNote = usingSchedule
+          ? '<div class="px-4 py-2 text-xs text-muted-foreground bg-muted/60">ℹ️ 呢個站而家冇即時班次，下面係一般會經過嘅路線（時間會等有車先顯示）。</div>'
+          : '';
+        list.innerHTML = scheduleNote + groups.map(g => `
           <label class="flex items-center gap-3 px-4 py-2.5 text-sm cursor-pointer hover:bg-muted transition-colors">
             <input type="checkbox" class="route-checkbox accent-accent" data-key="${escapeHtml(g.key)}" checked />
             <span class="shrink-0 rounded bg-primary text-primary-foreground text-xs font-bold px-2 py-1">${escapeHtml(g.route)}</span>

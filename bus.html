@@ -122,12 +122,25 @@
             <button type="button" onclick="closePicker()" class="text-xs text-muted-foreground hover:text-foreground">取消</button>
           </div>
           <div class="relative">
-            <input id="search-input" type="text" placeholder="輸入車站名稱，例如：旺角、彌敦道、Central..."
+            <input id="search-input" type="text" placeholder="輸入車站名稱或巴士號碼，例如：旺角、1A..."
               class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent"
               autocomplete="off" />
-            <div id="search-loading" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hidden">載入車站資料中...</div>
+            <div id="search-loading" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hidden">載入資料中...</div>
           </div>
-          <div id="search-results" class="mt-2 max-h-72 overflow-y-auto rounded-lg border border-border hidden divide-y divide-border"></div>
+          <div id="search-results" class="mt-2 max-h-80 overflow-y-auto rounded-lg border border-border hidden divide-y divide-border"></div>
+        </div>
+
+        <!-- Step 3b: stops along a chosen route -->
+        <div id="picker-step-route-stops" class="hidden">
+          <div class="mb-3 flex items-center justify-between">
+            <button type="button" onclick="backToSearch()" class="text-xs text-muted-foreground hover:text-foreground">← 返回</button>
+            <span class="text-sm font-semibold">揀車站</span>
+            <button type="button" onclick="closePicker()" class="text-xs text-muted-foreground hover:text-foreground">取消</button>
+          </div>
+          <p id="route-stops-title" class="mb-3 text-sm font-medium"></p>
+          <div id="route-stops-list" class="max-h-80 overflow-y-auto rounded-lg border border-border divide-y divide-border">
+            <div class="px-4 py-3 text-sm text-muted-foreground">載入車站中...</div>
+          </div>
         </div>
 
         <!-- Step 4: route selection -->
@@ -183,6 +196,19 @@
     tickClock();
     setInterval(tickClock, 1000);
 
+    // Large government API responses occasionally fail (connection reset) when several
+    // requests hit the same host at once — retry once after a short pause before giving up.
+    async function fetchJsonWithRetry(url, retries = 1) {
+      try {
+        const res = await fetch(url);
+        return await res.json();
+      } catch (err) {
+        if (retries <= 0) throw err;
+        await new Promise(r => setTimeout(r, 800));
+        return fetchJsonWithRetry(url, retries - 1);
+      }
+    }
+
     // ---------- Provider abstraction (extensible for future companies/countries) ----------
     // Each provider implements: loadStopIndex(), searchStops(query), fetchEta(stopId)
     const Providers = {};
@@ -191,26 +217,106 @@
       id: 'KMB',
       label: '九巴 KMB',
       _stopIndex: null,
-      _loading: null,
+      _stopLoading: null,
+      _routesList: null,
+      _routesLoading: null,
+      _routeStopIndex: null,
+      _routeStopLoading: null,
+      _stopToRoutes: null, // Map stopId -> sorted [route codes], built from _routeStopIndex
       async loadStopIndex() {
         if (this._stopIndex) return this._stopIndex;
-        if (this._loading) return this._loading;
-        this._loading = fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop')
-          .then(r => r.json())
+        if (this._stopLoading) return this._stopLoading;
+        this._stopLoading = fetchJsonWithRetry('https://data.etabus.gov.hk/v1/transport/kmb/stop')
           .then(json => {
             this._stopIndex = json.data;
             return this._stopIndex;
-          });
-        return this._loading;
+          })
+          .catch(err => { this._stopLoading = null; throw err; }); // let a later call retry instead of staying broken
+        return this._stopLoading;
+      },
+      async loadRoutesList() {
+        if (this._routesList) return this._routesList;
+        if (this._routesLoading) return this._routesLoading;
+        this._routesLoading = fetchJsonWithRetry('https://data.etabus.gov.hk/v1/transport/kmb/route/')
+          .then(json => {
+            this._routesList = json.data;
+            return this._routesList;
+          })
+          .catch(err => { this._routesLoading = null; throw err; });
+        return this._routesLoading;
+      },
+      async loadRouteStopIndex() {
+        if (this._routeStopIndex) return this._routeStopIndex;
+        if (this._routeStopLoading) return this._routeStopLoading;
+        this._routeStopLoading = fetchJsonWithRetry('https://data.etabus.gov.hk/v1/transport/kmb/route-stop')
+          .then(json => {
+            this._routeStopIndex = json.data;
+            const map = new Map();
+            for (const rs of this._routeStopIndex) {
+              if (!map.has(rs.stop)) map.set(rs.stop, new Set());
+              map.get(rs.stop).add(rs.route);
+            }
+            this._stopToRoutes = map;
+            return this._routeStopIndex;
+          })
+          .catch(err => { this._routeStopLoading = null; throw err; });
+        return this._routeStopLoading;
       },
       async searchStops(query) {
+        // Route-number previews come from the (large, occasionally flaky) route-stop index,
+        // loaded separately in the background — read whatever's cached, don't block or fail
+        // stop-name search on it. Core search only ever depends on the stop index.
         const index = await this.loadStopIndex();
         const q = query.trim().toLowerCase();
         if (!q) return [];
         return index
           .filter(s => s.name_tc.toLowerCase().includes(q) || s.name_en.toLowerCase().includes(q) || s.name_sc.toLowerCase().includes(q))
           .slice(0, 30)
-          .map(s => ({ providerId: 'KMB', stopId: s.stop, nameTc: s.name_tc, nameEn: s.name_en }));
+          .map(s => {
+            const routeSet = this._stopToRoutes?.get(s.stop);
+            const routesPreview = routeSet ? Array.from(routeSet).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true })) : [];
+            return { providerId: 'KMB', stopId: s.stop, nameTc: s.name_tc, nameEn: s.name_en, routesPreview };
+          });
+      },
+      async searchRoutes(query) {
+        // Same principle: if the routes list hasn't loaded (or failed), just return no
+        // route matches rather than throwing — the stop-name half of the search still works.
+        let routes;
+        try {
+          routes = await this.loadRoutesList();
+        } catch {
+          return [];
+        }
+        const q = query.trim().toUpperCase();
+        if (!q) return [];
+        const matched = routes.filter(r => r.route.toUpperCase().startsWith(q));
+        // one entry per route+direction, preferring the primary service_type
+        const byKey = new Map();
+        for (const r of matched) {
+          const key = r.route + '|' + r.bound;
+          if (!byKey.has(key) || r.service_type === '1') byKey.set(key, r);
+        }
+        return Array.from(byKey.values())
+          .sort((a, b) => a.route.localeCompare(b.route, 'zh-Hant', { numeric: true }))
+          .slice(0, 15)
+          .map(r => ({ providerId: 'KMB', route: r.route, bound: r.bound, serviceType: r.service_type, origTc: r.orig_tc, destTc: r.dest_tc }));
+      },
+      async getStopsForRoute(route, bound, serviceType) {
+        // Deliberately hits the small per-route endpoint (dozens of stops) instead of the
+        // 3MB bulk /route-stop index — this step must stay fast and reliable even if that
+        // big background-loaded file never arrives.
+        const direction = bound === 'I' ? 'inbound' : 'outbound';
+        const [stopIndex, routeStopJson] = await Promise.all([
+          this.loadStopIndex(),
+          fetchJsonWithRetry(`https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${encodeURIComponent(route)}/${direction}/${encodeURIComponent(serviceType)}`),
+        ]);
+        const stopById = new Map(stopIndex.map(s => [s.stop, s]));
+        return (routeStopJson.data || [])
+          .sort((a, b) => Number(a.seq) - Number(b.seq))
+          .map(rs => {
+            const s = stopById.get(rs.stop);
+            return { providerId: 'KMB', stopId: rs.stop, nameTc: s?.name_tc || rs.stop, nameEn: s?.name_en || '', seq: rs.seq };
+          });
       },
       async fetchEta(stopId) {
         const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${stopId}`);
@@ -258,7 +364,7 @@
     let lastRegionId = localStorage.getItem('bus_last_region');
 
     function hideAllPickerSteps() {
-      ['picker-step-region', 'picker-step-company', 'picker-step-search', 'picker-step-routes']
+      ['picker-step-region', 'picker-step-company', 'picker-step-search', 'picker-step-route-stops', 'picker-step-routes']
         .forEach(id => document.getElementById(id).classList.add('hidden'));
     }
 
@@ -415,8 +521,21 @@
 
     searchInput.addEventListener('focus', () => {
       if (!pickerCompany) return;
+      const provider = Providers[pickerCompany.id];
+      // Stop-name search only needs the stop index — unblock typing as soon as that's ready.
       searchLoading.classList.remove('hidden');
-      Providers[pickerCompany.id].loadStopIndex().finally(() => searchLoading.classList.add('hidden'));
+      const stopIndexReady = provider.loadStopIndex();
+      stopIndexReady.finally(() => searchLoading.classList.add('hidden'));
+      // Route-number search + route previews are a background enhancement, loaded strictly
+      // one-at-a-time after the stop index. Firing these large government-API requests
+      // concurrently caused intermittent connection failures during testing — the API seems
+      // to reject overlapping large requests from the same client.
+      if (provider.loadRoutesList && provider.loadRouteStopIndex) {
+        stopIndexReady
+          .then(() => provider.loadRoutesList())
+          .then(() => provider.loadRouteStopIndex())
+          .catch(() => {}); // background enhancement — a failure here shouldn't surface as an error
+      }
     });
 
     searchInput.addEventListener('input', () => {
@@ -428,29 +547,84 @@
         return;
       }
       searchDebounce = setTimeout(async () => {
-        const results = await Providers[pickerCompany.id].searchStops(q);
-        renderSearchResults(results);
+        const provider = Providers[pickerCompany.id];
+        const [stopResults, routeResults] = await Promise.all([
+          provider.searchStops(q),
+          provider.searchRoutes ? provider.searchRoutes(q) : Promise.resolve([]),
+        ]);
+        renderSearchResults(stopResults, routeResults);
       }, 200);
     });
 
-    function renderSearchResults(results) {
-      if (!results.length) {
-        searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">搵唔到相關車站</div>';
+    function renderSearchResults(stopResults, routeResults) {
+      if (!stopResults.length && !routeResults.length) {
+        searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">搵唔到相關車站或路線</div>';
         searchResults.classList.remove('hidden');
         return;
       }
-      searchResults.innerHTML = results.map(r => `
-        <button type="button" class="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors flex items-center justify-between gap-2" data-provider="${r.providerId}" data-stop="${r.stopId}" data-name="${escapeHtml(r.nameTc)}">
-          <span>${escapeHtml(r.nameTc)}</span>
-          <span class="text-xs text-muted-foreground">${escapeHtml(r.nameEn)}</span>
-        </button>
-      `).join('');
+      let html = '';
+      if (routeResults.length) {
+        html += '<div class="px-4 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/60">🚌 路線</div>';
+        html += routeResults.map(r => `
+          <button type="button" class="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
+            data-kind="route" data-provider="${r.providerId}" data-route="${escapeHtml(r.route)}" data-bound="${r.bound}" data-servicetype="${escapeHtml(r.serviceType)}" data-dest="${escapeHtml(r.destTc)}">
+            <span class="shrink-0 rounded bg-primary text-primary-foreground text-xs font-bold px-2 py-1">${escapeHtml(r.route)}</span>
+            <span class="truncate text-muted-foreground">開往 ${escapeHtml(r.destTc)}</span>
+          </button>
+        `).join('');
+      }
+      if (stopResults.length) {
+        html += '<div class="px-4 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/60">🚏 車站</div>';
+        html += stopResults.map(r => `
+          <button type="button" class="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors" data-kind="stop" data-provider="${r.providerId}" data-stop="${r.stopId}" data-name="${escapeHtml(r.nameTc)}">
+            <div class="flex items-center justify-between gap-2">
+              <span>${escapeHtml(r.nameTc)}</span>
+              <span class="text-xs text-muted-foreground shrink-0">${escapeHtml(r.nameEn)}</span>
+            </div>
+            ${r.routesPreview && r.routesPreview.length ? `<div class="mt-0.5 text-xs text-muted-foreground truncate">路線：${escapeHtml(r.routesPreview.slice(0, 12).join('、'))}${r.routesPreview.length > 12 ? ' ...' : ''}</div>` : ''}
+          </button>
+        `).join('');
+      }
+      searchResults.innerHTML = html;
       searchResults.classList.remove('hidden');
-      searchResults.querySelectorAll('button').forEach(btn => {
+      searchResults.querySelectorAll('button[data-kind="stop"]').forEach(btn => {
         btn.addEventListener('click', () => {
           selectStopForRouteChoice(btn.dataset.provider, btn.dataset.stop, btn.dataset.name);
         });
       });
+      searchResults.querySelectorAll('button[data-kind="route"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectRouteForStopChoice(btn.dataset.provider, btn.dataset.route, btn.dataset.bound, btn.dataset.servicetype, btn.dataset.dest);
+        });
+      });
+    }
+
+    async function selectRouteForStopChoice(providerId, route, bound, serviceType, destTc) {
+      hideAllPickerSteps();
+      document.getElementById('picker-step-route-stops').classList.remove('hidden');
+      document.getElementById('route-stops-title').textContent = `路線 ${route}　開往 ${destTc}`;
+      const list = document.getElementById('route-stops-list');
+      list.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">載入車站中...</div>';
+      try {
+        const stops = await Providers[providerId].getStopsForRoute(route, bound, serviceType);
+        if (!stops.length) {
+          list.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">搵唔到呢條路線嘅車站</div>';
+          return;
+        }
+        list.innerHTML = stops.map(s => `
+          <button type="button" class="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors flex items-center gap-3" data-provider="${s.providerId}" data-stop="${s.stopId}" data-name="${escapeHtml(s.nameTc)}">
+            <span class="shrink-0 text-xs text-muted-foreground w-6 text-right">${escapeHtml(s.seq)}</span>
+            <span class="flex-1 truncate">${escapeHtml(s.nameTc)}</span>
+          </button>
+        `).join('');
+        list.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectStopForRouteChoice(btn.dataset.provider, btn.dataset.stop, btn.dataset.name);
+          });
+        });
+      } catch (err) {
+        list.innerHTML = '<div class="px-4 py-3 text-sm text-red-500">載入失敗，請返回重試</div>';
+      }
     }
 
     function escapeHtml(str) {

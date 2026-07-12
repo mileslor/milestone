@@ -121,6 +121,10 @@
             <span class="text-sm font-semibold">3. 搜尋車站</span>
             <button type="button" onclick="closePicker()" class="text-xs text-muted-foreground hover:text-foreground">取消</button>
           </div>
+          <button id="nearby-btn" type="button" onclick="onNearbyClick()"
+            class="mb-2 w-full flex items-center justify-center gap-2 rounded-lg border border-border py-2.5 text-sm font-medium transition-colors hover:border-accent hover:text-accent">
+            📍 搵附近車站
+          </button>
           <div class="relative">
             <input id="search-input" type="text" placeholder="輸入車站名稱或巴士號碼，例如：旺角、1A..."
               class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent"
@@ -196,6 +200,20 @@
     tickClock();
     setInterval(tickClock, 1000);
 
+    // Shared by every provider's findNearbyStops() so "search near me" behaves identically
+    // regardless of region (Hong Kong today, Manchester once that provider exists).
+    function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    function formatDistance(m) {
+      return m < 1000 ? `${Math.round(m)} 米` : `${(m / 1000).toFixed(1)} 公里`;
+    }
+
     // Large government API responses occasionally fail (connection reset) when several
     // requests hit the same host at once — retry once after a short pause before giving up.
     async function fetchJsonWithRetry(url, retries = 1) {
@@ -262,6 +280,10 @@
           .catch(err => { this._routeStopLoading = null; throw err; });
         return this._routeStopLoading;
       },
+      _routesPreviewFor(stopId) {
+        const routeSet = this._stopToRoutes?.get(stopId);
+        return routeSet ? Array.from(routeSet).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true })) : [];
+      },
       async searchStops(query) {
         // Route-number previews come from the (large, occasionally flaky) route-stop index,
         // loaded separately in the background — read whatever's cached, don't block or fail
@@ -272,11 +294,21 @@
         return index
           .filter(s => s.name_tc.toLowerCase().includes(q) || s.name_en.toLowerCase().includes(q) || s.name_sc.toLowerCase().includes(q))
           .slice(0, 30)
-          .map(s => {
-            const routeSet = this._stopToRoutes?.get(s.stop);
-            const routesPreview = routeSet ? Array.from(routeSet).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true })) : [];
-            return { providerId: 'KMB', stopId: s.stop, nameTc: s.name_tc, nameEn: s.name_en, routesPreview };
-          });
+          .map(s => ({ providerId: 'KMB', stopId: s.stop, nameTc: s.name_tc, nameEn: s.name_en, routesPreview: this._routesPreviewFor(s.stop) }));
+      },
+      // Standard provider interface for "find stops near me" — any future region/company
+      // (Manchester bus, Metrolink...) should implement the same shape: (lat, lng) -> stops
+      // sorted nearest-first, each with a distanceM field, so the picker UI stays identical.
+      async findNearbyStops(lat, lng) {
+        const index = await this.loadStopIndex();
+        return index
+          .map(s => ({
+            providerId: 'KMB', stopId: s.stop, nameTc: s.name_tc, nameEn: s.name_en,
+            distanceM: haversineDistanceMeters(lat, lng, parseFloat(s.lat), parseFloat(s.long)),
+            routesPreview: this._routesPreviewFor(s.stop),
+          }))
+          .sort((a, b) => a.distanceM - b.distanceM)
+          .slice(0, 15);
       },
       async searchRoutes(query) {
         // Same principle: if the routes list hasn't loaded (or failed), just return no
@@ -437,6 +469,7 @@
       searchInput.value = '';
       searchResults.classList.add('hidden');
       searchResults.innerHTML = '';
+      document.getElementById('nearby-btn').classList.toggle('hidden', !Providers[company.id].findNearbyStops);
       searchInput.focus();
     }
     function backToRegion() {
@@ -518,6 +551,66 @@
     const searchResults = document.getElementById('search-results');
     const searchLoading = document.getElementById('search-loading');
     let searchDebounce = null;
+
+    function onNearbyClick() {
+      if (!pickerCompany) return;
+      const provider = Providers[pickerCompany.id];
+      if (!provider.findNearbyStops) return; // button is hidden in this case, but guard anyway
+      if (!navigator.geolocation) {
+        searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-red-500">呢個瀏覽器唔支援定位功能。</div>';
+        searchResults.classList.remove('hidden');
+        return;
+      }
+      const btn = document.getElementById('nearby-btn');
+      btn.disabled = true;
+      btn.textContent = '📍 定位緊...';
+      searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">定位緊，請允許瀏覽器攞你位置...</div>';
+      searchResults.classList.remove('hidden');
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const stops = await provider.findNearbyStops(pos.coords.latitude, pos.coords.longitude);
+            renderNearbyResults(stops);
+          } catch (err) {
+            searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-red-500">搜尋附近車站失敗，請重試。</div>';
+          } finally {
+            btn.disabled = false;
+            btn.textContent = '📍 搵附近車站';
+          }
+        },
+        () => {
+          searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-red-500">攞唔到你嘅位置，請檢查瀏覽器定位權限後再試。</div>';
+          btn.disabled = false;
+          btn.textContent = '📍 搵附近車站';
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function renderNearbyResults(stops) {
+      if (!stops.length) {
+        searchResults.innerHTML = '<div class="px-4 py-3 text-sm text-muted-foreground">附近搵唔到車站</div>';
+        searchResults.classList.remove('hidden');
+        return;
+      }
+      let html = '<div class="px-4 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/60">📍 附近車站</div>';
+      html += stops.map(s => `
+        <button type="button" class="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors" data-kind="stop" data-provider="${s.providerId}" data-stop="${s.stopId}" data-name="${escapeHtml(s.nameTc)}">
+          <div class="flex items-center justify-between gap-2">
+            <span>${escapeHtml(s.nameTc)}</span>
+            <span class="text-xs font-medium text-accent shrink-0">${formatDistance(s.distanceM)}</span>
+          </div>
+          ${s.routesPreview && s.routesPreview.length ? `<div class="mt-0.5 text-xs text-muted-foreground truncate">路線：${escapeHtml(s.routesPreview.slice(0, 12).join('、'))}${s.routesPreview.length > 12 ? ' ...' : ''}</div>` : ''}
+        </button>
+      `).join('');
+      searchResults.innerHTML = html;
+      searchResults.classList.remove('hidden');
+      searchResults.querySelectorAll('button[data-kind="stop"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectStopForRouteChoice(btn.dataset.provider, btn.dataset.stop, btn.dataset.name);
+        });
+      });
+    }
 
     searchInput.addEventListener('focus', () => {
       if (!pickerCompany) return;

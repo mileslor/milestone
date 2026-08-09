@@ -19,7 +19,7 @@
   a{color:inherit;}
 
   header.top{padding:26px 0 14px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.25);}
-  header.top .brand{font-size:1.7rem;letter-spacing:4px;color:var(--gold-soft);font-weight:600;}
+  header.top .brand{font-size:1.7rem;letter-spacing:4px;color:var(--gold-soft);font-weight:600;cursor:pointer;}
   header.top .brand small{display:block;font-size:0.8rem;letter-spacing:2px;color:#c9a876;margin-top:6px;font-weight:normal;}
 
   /* progress hint bar */
@@ -156,7 +156,7 @@
 
 <header class="top">
   <div class="container">
-    <div class="brand">曦 銓 堂<small>占卜問卦 · 誠心指引</small></div>
+    <div class="brand" id="brand-home" role="button" tabindex="0" title="返回首頁">曦 銓 堂<small>占卜問卦 · 誠心指引</small></div>
   </div>
 </header>
 
@@ -347,6 +347,10 @@ function goTo(step){
 }
 
 document.getElementById('card-guandi').addEventListener('click', ()=>goTo('intro'));
+
+const brandHome = document.getElementById('brand-home');
+brandHome.addEventListener('click', ()=>goTo('home'));
+brandHome.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); goTo('home'); } });
 
 function resetDrawUI(){
   document.getElementById('draw-idle').style.display='block';

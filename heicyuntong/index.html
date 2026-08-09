@@ -302,6 +302,14 @@
       </p>
     </div>
 
+    <div class="panel">
+      <h2>有疑問？聯絡曦銓堂</h2>
+      <div class="actions" style="margin-top:0;">
+        <a class="btn" href="https://wa.me/85264857212" target="_blank" rel="noopener">💬 WhatsApp 曦銓堂</a>
+        <span class="btn ghost" style="opacity:0.5;cursor:not-allowed;">📷 Instagram（敬請期待）</span>
+      </div>
+    </div>
+
     <div class="actions">
       <button class="btn ghost" onclick="goTo('home')">返回首頁</button>
       <button class="btn" onclick="goTo('intro')">再問一事</button>
@@ -402,12 +410,20 @@ function tossBlocks(){
   setTimeout(()=>{
     b1.classList.remove('tossing');
     b2.classList.remove('tossing');
-    const s1 = Math.random() < 0.5; // true = flat(平面) up
-    const s2 = Math.random() < 0.5;
+    // 明確按 1/4 笑杯、1/2 聖杯、1/4 陰杯嘅比例擲杯，唔靠兩個獨立擲拋間接砌出嚟
+    const r = Math.random();
+    let s1, s2, outcome;
+    if(r < 0.25){
+      outcome = 'laugh'; s1 = true; s2 = true; // 笑杯：兩塊都平面向上
+    } else if(r < 0.75){
+      outcome = 'sheng'; s1 = Math.random() < 0.5; s2 = !s1; // 聖杯：一正一反
+    } else {
+      outcome = 'yin'; s1 = false; s2 = false; // 陰杯：兩塊都圓面向上
+    }
     renderBlock(b1, s1);
     renderBlock(b2, s2);
 
-    if(s1 !== s2){
+    if(outcome === 'sheng'){
       // 聖杯
       streakCount++;
       updateStreakDots();
@@ -420,7 +436,7 @@ function tossBlocks(){
         document.getElementById('outcome-msg').textContent = '聖杯！（' + streakCount + '/3）';
         document.getElementById('outcome-sub').textContent = '仲要再連續擲中先算確認，繼續誠心擲杯';
       }
-    } else if(s1 && s2){
+    } else if(outcome === 'laugh'){
       // 笑杯：兩塊都平面向上
       document.getElementById('outcome-msg').textContent = '😊 笑杯';
       document.getElementById('outcome-sub').textContent = '關帝話你問嘅嘢仲未夠清楚，收拾心神，再擲一次（唔會扣走已有嘅聖杯次數）';

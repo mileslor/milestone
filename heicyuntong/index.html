@@ -191,17 +191,15 @@
         <h3>六爻搖卦</h3>
         <p>即將推出</p>
       </div>
-      <div class="method-card disabled">
-        <span class="badge">敬請期待</span>
+      <div class="method-card" id="card-bazi">
         <div class="icon">🀫</div>
         <h3>八字排盤</h3>
-        <p>即將推出</p>
+        <p>輸入出生時間，排四柱八字</p>
       </div>
-      <div class="method-card disabled">
-        <span class="badge">敬請期待</span>
+      <div class="method-card" id="card-zeri">
         <div class="icon">🕯️</div>
         <h3>擇日</h3>
-        <p>即將推出</p>
+        <p>根據通勝，揀個好日子</p>
       </div>
     </div>
   </section>
@@ -347,6 +345,8 @@ function goTo(step){
 }
 
 document.getElementById('card-guandi').addEventListener('click', ()=>goTo('intro'));
+document.getElementById('card-bazi').addEventListener('click', ()=>location.href='bazi.html');
+document.getElementById('card-zeri').addEventListener('click', ()=>location.href='zeri.html');
 
 const brandHome = document.getElementById('brand-home');
 brandHome.addEventListener('click', ()=>goTo('home'));

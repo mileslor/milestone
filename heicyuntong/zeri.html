@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曦銓堂 | 擇日</title>
+<style>
+  :root{
+    --bg:#1a0d0a; --bg2:#2b1410; --gold:#d4af37; --gold-soft:#e8c766;
+    --red:#8b1a1a; --red-deep:#5c0f0f; --cream:#f3e6cf; --ink:#2a1a12;
+    --good:#5fae6a; --bad:#c85a4f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Noto Serif CJK TC","PMingLiU","Songti TC",serif;
+    background:radial-gradient(ellipse at top,#3a1c14 0%,var(--bg) 60%,#0d0605 100%);
+    color:var(--cream); min-height:100vh; line-height:1.8;
+  }
+  .container{max-width:820px;margin:0 auto;padding:0 20px;}
+  a{color:inherit;}
+
+  header.top{padding:26px 0 14px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.25);}
+  header.top .brand{font-size:1.7rem;letter-spacing:4px;color:var(--gold-soft);font-weight:600;cursor:pointer;}
+  header.top .brand small{display:block;font-size:0.8rem;letter-spacing:2px;color:#c9a876;margin-top:6px;font-weight:normal;}
+
+  main{padding:36px 0 80px;}
+  h1.page-title{font-size:1.5rem;color:var(--gold-soft);text-align:center;margin-bottom:6px;letter-spacing:1px;}
+  p.page-sub{text-align:center;color:#c9b18a;font-size:0.92rem;margin-bottom:30px;}
+
+  .panel{
+    background:linear-gradient(160deg,#2c1611,#1c0d09);
+    border:1px solid rgba(212,175,55,0.25); border-radius:16px;
+    padding:28px 24px; margin-bottom:20px;
+  }
+  .panel h2{color:var(--gold-soft);font-size:1.15rem;margin-bottom:14px;text-align:center;}
+
+  label{display:block;font-size:0.88rem;color:#dcc9a3;margin-bottom:6px;}
+  .field{margin-bottom:18px;}
+  .row{display:flex;gap:14px;flex-wrap:wrap;}
+  .row .field{flex:1;min-width:160px;}
+  input[type="date"],select{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(212,175,55,0.35);
+    background:rgba(0,0,0,0.25); color:var(--cream); font-size:1rem; font-family:inherit;
+  }
+  input:focus,select:focus{outline:2px solid var(--gold);}
+
+  .btn{
+    display:inline-block; background:linear-gradient(135deg,var(--gold),#a9791f);
+    color:#241109; font-weight:700; border:none; border-radius:30px;
+    padding:14px 40px; font-size:1rem; cursor:pointer; letter-spacing:1px;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(212,175,55,0.35);}
+  .btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--gold-soft);}
+  .center{text-align:center;}
+  .actions{display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap;}
+
+  #result{display:none;}
+  .summary-list{display:flex;flex-direction:column;gap:8px;}
+  .summary-item{display:flex;justify-content:space-between;align-items:center;background:rgba(95,174,106,0.12);border:1px solid rgba(95,174,106,0.4);border-radius:10px;padding:10px 16px;font-size:0.9rem;}
+  .summary-empty{text-align:center;color:#c9b18a;font-size:0.9rem;}
+
+  .day-card{border:1px solid rgba(212,175,55,0.18);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:rgba(0,0,0,0.15);}
+  .day-card.good{border-color:var(--good);background:rgba(95,174,106,0.08);}
+  .day-card.bad{border-color:var(--bad);background:rgba(200,90,79,0.08);}
+  .day-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;flex-wrap:wrap;gap:6px;}
+  .day-head .date{font-size:1.05rem;color:var(--gold-soft);font-weight:700;}
+  .day-head .lunar{font-size:0.82rem;color:#a88c63;}
+  .day-tag{font-size:0.75rem;padding:2px 10px;border-radius:12px;border:1px solid currentColor;}
+  .day-tag.good{color:var(--good);}
+  .day-tag.bad{color:var(--bad);}
+  .day-tag.neutral{color:#a88c63;}
+  .day-detail{font-size:0.82rem;color:#c9b18a;}
+  .day-detail b{color:#dcc9a3;}
+
+  footer{text-align:center;padding:26px 0 40px;color:#8a7150;font-size:0.78rem;border-top:1px solid rgba(212,175,55,0.15);margin-top:20px;}
+  footer p{margin-bottom:4px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="container">
+    <div class="brand" id="brand-home" role="button" tabindex="0" title="返回首頁">曦 銓 堂<small>占卜問卦 · 誠心指引</small></div>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title">擇日</h1>
+  <p class="page-sub">根據通勝宜忌，幫你揀一個好日子</p>
+
+  <div class="panel">
+    <div class="row">
+      <div class="field">
+        <label for="in-event">想做嘅事</label>
+        <select id="in-event">
+          <option value="">其他 / 唔揀（顯示一般宜忌）</option>
+          <option value="搬屋">搬屋 / 入宅</option>
+          <option value="開業">開業 / 開市</option>
+          <option value="結婚">結婚 / 嫁娶</option>
+          <option value="簽約">簽約 / 交易</option>
+          <option value="裝修">裝修 / 動土</option>
+          <option value="出行">出行 / 旅遊</option>
+          <option value="祈福">祈福 / 開光</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="in-start">開始日期</label>
+        <input type="date" id="in-start">
+      </div>
+      <div class="field">
+        <label for="in-range">查詢範圍</label>
+        <select id="in-range">
+          <option value="7">7 日</option>
+          <option value="14" selected>14 日</option>
+          <option value="30">30 日</option>
+        </select>
+      </div>
+    </div>
+    <div class="center">
+      <button class="btn" onclick="calcZeRi()">開始擇日</button>
+    </div>
+  </div>
+
+  <div id="result">
+    <div class="panel">
+      <h2>推薦吉日</h2>
+      <div class="summary-list" id="r-summary"></div>
+    </div>
+
+    <div class="panel">
+      <h2>逐日詳情</h2>
+      <div id="r-days"></div>
+    </div>
+
+    <div class="panel">
+      <p style="text-align:center;font-size:0.9rem;color:#dcc9a3;">
+        以上根據傳統通勝宜忌自動篩選，僅供參考。重要日子（例如結婚、開業）
+        建議帶埋你想揀嘅日子嚟曦銓堂，由師傅為你確認同埋詳細擇日。
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>有疑問？聯絡曦銓堂</h2>
+      <div class="actions" style="margin-top:0;">
+        <a class="btn" href="https://wa.me/85264857212" target="_blank" rel="noopener">💬 WhatsApp 曦銓堂</a>
+        <span class="btn ghost" style="opacity:0.5;cursor:not-allowed;">📷 Instagram（敬請期待）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="center" style="margin-top:10px;">
+    <a class="btn ghost" href="index.html">返回首頁</a>
+  </div>
+</main>
+
+<footer>
+  <p>曦銓堂 · 占卜問卦</p>
+  <p>擇日內容基於傳統通勝宜忌，僅供參考，重要決定請以個人判斷及專業意見為準。</p>
+</footer>
+
+<script src="lunar.min.js"></script>
+<script src="chinese-conv.min.js"></script>
+<script>
+document.getElementById('brand-home').addEventListener('click', ()=>location.href='index.html');
+document.getElementById('brand-home').addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); location.href='index.html'; } });
+
+const t = (s)=> s==null ? '' : ChineseConv.tify(String(s));
+
+const EVENT_KEYWORDS = {
+  '搬屋': ['移徙','入宅','安床'],
+  '開業': ['開市','交易','立券'],
+  '結婚': ['嫁娶','納采','訂盟','冠笄','安床'],
+  '簽約': ['立券','交易','納財'],
+  '裝修': ['動土','修造','拆卸','起基','上梁','安門'],
+  '出行': ['出行'],
+  '祈福': ['祈福','開光','齋醮'],
+};
+
+// 今日日期預設值
+(function(){
+  const now = new Date();
+  const iso = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  document.getElementById('in-start').value = iso;
+})();
+
+function calcZeRi(){
+  const startVal = document.getElementById('in-start').value;
+  if(!startVal){ alert('請先揀開始日期'); return; }
+  const [y,m,d] = startVal.split('-').map(Number);
+  const days = parseInt(document.getElementById('in-range').value, 10);
+  const eventKey = document.getElementById('in-event').value;
+  const keywords = EVENT_KEYWORDS[eventKey] || null;
+
+  const startSolar = Solar.fromYmd(y, m, d);
+  const startJd = startSolar.getJulianDay();
+
+  const rows = [];
+  for(let i=0;i<days;i++){
+    const solar = Solar.fromJulianDay(startJd + i);
+    const lunar = solar.getLunar();
+    const yi = lunar.getDayYi().map(t);
+    const ji = lunar.getDayJi().map(t);
+    let tag = 'neutral';
+    if(keywords){
+      const hitYi = keywords.some(k=>yi.includes(k));
+      const hitJi = keywords.some(k=>ji.includes(k));
+      if(hitYi && !hitJi) tag = 'good';
+      else if(hitJi) tag = 'bad';
+    } else {
+      if(yi.includes('諸事不宜')) tag = 'bad';
+    }
+    rows.push({
+      solar, lunar, yi, ji, tag,
+      dateStr: y0(solar.getYear())+'-'+p2(solar.getMonth())+'-'+p2(solar.getDay()),
+      week: '星期' + t(solar.getWeekInChinese()),
+      lunarStr: t(lunar.toString()),
+      chong: t(lunar.getDayChongShengXiao()),
+    });
+  }
+
+  const goodDays = rows.filter(r=>r.tag==='good');
+  const summaryEl = document.getElementById('r-summary');
+  if(goodDays.length){
+    summaryEl.innerHTML = goodDays.map(r=>`
+      <div class="summary-item">
+        <span>${r.dateStr}（${r.week}，${r.lunarStr}）</span>
+        <span class="day-tag good">吉</span>
+      </div>
+    `).join('');
+  } else {
+    summaryEl.innerHTML = `<div class="summary-empty">呢段時間內冇特別岩做「${eventKey||'呢件事'}」嘅日子，可以睇下面逐日詳情，或者擴大查詢範圍。</div>`;
+  }
+
+  document.getElementById('r-days').innerHTML = rows.map(r=>`
+    <div class="day-card ${r.tag}">
+      <div class="day-head">
+        <span class="date">${r.dateStr}（${r.week}）</span>
+        <span class="lunar">${r.lunarStr}</span>
+        <span class="day-tag ${r.tag}">${r.tag==='good'?'吉日':r.tag==='bad'?'不宜':'一般'}</span>
+      </div>
+      <div class="day-detail"><b>沖：</b>${r.chong}　<b>宜：</b>${r.yi.join('、')||'無'}</div>
+      <div class="day-detail"><b>忌：</b>${r.ji.join('、')||'無'}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+
+function p2(n){ return String(n).padStart(2,'0'); }
+function y0(n){ return String(n); }
+</script>
+</body>
+</html>

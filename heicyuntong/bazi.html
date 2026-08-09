@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曦銓堂 | 八字排盤</title>
+<style>
+  :root{
+    --bg:#1a0d0a; --bg2:#2b1410; --gold:#d4af37; --gold-soft:#e8c766;
+    --red:#8b1a1a; --red-deep:#5c0f0f; --cream:#f3e6cf; --ink:#2a1a12;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Noto Serif CJK TC","PMingLiU","Songti TC",serif;
+    background:radial-gradient(ellipse at top,#3a1c14 0%,var(--bg) 60%,#0d0605 100%);
+    color:var(--cream); min-height:100vh; line-height:1.8;
+  }
+  .container{max-width:760px;margin:0 auto;padding:0 20px;}
+  a{color:inherit;}
+
+  header.top{padding:26px 0 14px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.25);}
+  header.top .brand{font-size:1.7rem;letter-spacing:4px;color:var(--gold-soft);font-weight:600;cursor:pointer;}
+  header.top .brand small{display:block;font-size:0.8rem;letter-spacing:2px;color:#c9a876;margin-top:6px;font-weight:normal;}
+
+  main{padding:36px 0 80px;}
+  h1.page-title{font-size:1.5rem;color:var(--gold-soft);text-align:center;margin-bottom:6px;letter-spacing:1px;}
+  p.page-sub{text-align:center;color:#c9b18a;font-size:0.92rem;margin-bottom:30px;}
+
+  .panel{
+    background:linear-gradient(160deg,#2c1611,#1c0d09);
+    border:1px solid rgba(212,175,55,0.25); border-radius:16px;
+    padding:28px 24px; margin-bottom:20px;
+  }
+  .panel h2{color:var(--gold-soft);font-size:1.15rem;margin-bottom:14px;text-align:center;}
+
+  label{display:block;font-size:0.88rem;color:#dcc9a3;margin-bottom:6px;}
+  .field{margin-bottom:18px;}
+  input[type="date"],input[type="time"],input[type="text"],select{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(212,175,55,0.35);
+    background:rgba(0,0,0,0.25); color:var(--cream); font-size:1rem; font-family:inherit;
+  }
+  input:focus,select:focus{outline:2px solid var(--gold);}
+  .checkline{display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#c9b18a;margin-top:6px;}
+  .checkline input{width:auto;}
+
+  .btn{
+    display:inline-block; background:linear-gradient(135deg,var(--gold),#a9791f);
+    color:#241109; font-weight:700; border:none; border-radius:30px;
+    padding:14px 40px; font-size:1rem; cursor:pointer; letter-spacing:1px;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(212,175,55,0.35);}
+  .btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--gold-soft);}
+  .center{text-align:center;}
+  .actions{display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap;}
+
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0;}
+  .pillar{text-align:center;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.22);border-radius:12px;padding:14px 6px;}
+  .pillar .label{font-size:0.72rem;color:#a88c63;margin-bottom:8px;letter-spacing:1px;}
+  .pillar .gan{font-size:1.5rem;color:var(--gold-soft);font-weight:700;}
+  .pillar .zhi{font-size:1.5rem;color:var(--cream);font-weight:700;}
+  .pillar .shishen{font-size:0.72rem;color:#c9b18a;margin-top:8px;}
+  .pillar .nayin{font-size:0.72rem;color:#8a7150;margin-top:2px;}
+
+  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;}
+  .meta-item{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.18);border-radius:8px;padding:10px 12px;font-size:0.85rem;text-align:center;}
+  .meta-item b{color:var(--gold-soft);display:block;font-size:1.05rem;margin-bottom:2px;}
+
+  .wuxing-bar{display:flex;justify-content:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+  .wx-chip{padding:6px 16px;border-radius:20px;font-size:0.85rem;border:1px solid rgba(212,175,55,0.3);}
+  .wx-金{color:#e8c766;} .wx-木{color:#7ec850;} .wx-水{color:#5cb3e6;} .wx-火{color:#e6604f;} .wx-土{color:#c9a06a;}
+
+  footer{text-align:center;padding:26px 0 40px;color:#8a7150;font-size:0.78rem;border-top:1px solid rgba(212,175,55,0.15);margin-top:20px;}
+  footer p{margin-bottom:4px;}
+  #result{display:none;}
+
+  @media (max-width:520px){
+    .pillars{grid-template-columns:repeat(2,1fr);}
+    .meta-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="container">
+    <div class="brand" id="brand-home" role="button" tabindex="0" title="返回首頁">曦 銓 堂<small>占卜問卦 · 誠心指引</small></div>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title">八字排盤</h1>
+  <p class="page-sub">輸入出生日期時間，排出四柱八字</p>
+
+  <div class="panel">
+    <div class="field">
+      <label for="in-name">姓名（可不填）</label>
+      <input type="text" id="in-name" placeholder="例如：陳大文">
+    </div>
+    <div class="field">
+      <label for="in-date">出生日期（西曆）</label>
+      <input type="date" id="in-date">
+    </div>
+    <div class="field">
+      <label for="in-time">出生時間</label>
+      <input type="time" id="in-time" value="12:00">
+      <div class="checkline">
+        <input type="checkbox" id="in-notime">
+        <label for="in-notime" style="margin:0;">唔知道準確時間（時柱只供參考）</label>
+      </div>
+    </div>
+    <div class="center">
+      <button class="btn" onclick="calcBazi()">排盤</button>
+    </div>
+  </div>
+
+  <div id="result">
+    <div class="panel">
+      <h2 id="r-title">四柱八字</h2>
+      <div class="pillars" id="r-pillars"></div>
+      <div class="meta-grid">
+        <div class="meta-item"><b id="r-shengxiao"></b>生肖</div>
+        <div class="meta-item"><b id="r-xingzuo"></b>星座</div>
+      </div>
+      <div class="wuxing-bar" id="r-wuxing"></div>
+    </div>
+
+    <div class="panel">
+      <p style="text-align:center;font-size:0.9rem;color:#dcc9a3;">
+        以上為你嘅四柱八字同五行分佈，僅供參考。詳細命理分析（大運流年、用神喜忌等）
+        建議帶住呢個結果嚟曦銓堂，由師傅為你詳細解讀。
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>有疑問？聯絡曦銓堂</h2>
+      <div class="actions" style="margin-top:0;">
+        <a class="btn" href="https://wa.me/85264857212" target="_blank" rel="noopener">💬 WhatsApp 曦銓堂</a>
+        <span class="btn ghost" style="opacity:0.5;cursor:not-allowed;">📷 Instagram（敬請期待）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="center" style="margin-top:10px;">
+    <a class="btn ghost" href="index.html">返回首頁</a>
+  </div>
+</main>
+
+<footer>
+  <p>曦銓堂 · 占卜問卦</p>
+  <p>八字計算基於傳統干支曆法，僅供參考，重要決定請以個人判斷及專業意見為準。</p>
+</footer>
+
+<script src="lunar.min.js"></script>
+<script src="chinese-conv.min.js"></script>
+<script>
+document.getElementById('brand-home').addEventListener('click', ()=>location.href='index.html');
+document.getElementById('brand-home').addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); location.href='index.html'; } });
+
+const t = (s)=> s==null ? '' : ChineseConv.tify(String(s));
+
+function calcBazi(){
+  const dateVal = document.getElementById('in-date').value;
+  if(!dateVal){ alert('請先填出生日期'); return; }
+  const [y,m,d] = dateVal.split('-').map(Number);
+  const noTime = document.getElementById('in-notime').checked;
+  let hh = 12, mm = 0;
+  if(!noTime){
+    const timeVal = document.getElementById('in-time').value || '12:00';
+    [hh,mm] = timeVal.split(':').map(Number);
+  }
+
+  const solar = Solar.fromYmdHms(y, m, d, hh, mm, 0);
+  const lunar = solar.getLunar();
+  const ec = lunar.getEightChar();
+
+  const name = document.getElementById('in-name').value.trim();
+  document.getElementById('r-title').textContent = name ? (name + ' 嘅四柱八字') : '四柱八字';
+
+  const pillars = [
+    {label:'年柱', gan:ec.getYearGan(), zhi:ec.getYearZhi(), shishen: t(ec.getYearShiShenGan()), nayin:t(ec.getYearNaYin())},
+    {label:'月柱', gan:ec.getMonthGan(), zhi:ec.getMonthZhi(), shishen: t(ec.getMonthShiShenGan()), nayin:t(ec.getMonthNaYin())},
+    {label:'日柱', gan:ec.getDayGan(), zhi:ec.getDayZhi(), shishen: '日主', nayin:t(ec.getDayNaYin())},
+    {label:'時柱' + (noTime?'（參考）':''), gan:ec.getTimeGan(), zhi:ec.getTimeZhi(), shishen: t(ec.getTimeShiShenGan()), nayin:t(ec.getTimeNaYin())},
+  ];
+  document.getElementById('r-pillars').innerHTML = pillars.map(p=>`
+    <div class="pillar">
+      <div class="label">${p.label}</div>
+      <div class="gan">${t(p.gan)}</div>
+      <div class="zhi">${t(p.zhi)}</div>
+      <div class="shishen">${p.shishen}</div>
+      <div class="nayin">${p.nayin}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('r-shengxiao').textContent = t(lunar.getYearShengXiao());
+  document.getElementById('r-xingzuo').textContent = t(solar.getXingZuo());
+
+  // 五行分佈：統計四柱幹支合共八個字對應嘅五行
+  const wuxingAll = [ec.getYearWuXing(), ec.getMonthWuXing(), ec.getDayWuXing(), ec.getTimeWuXing()].join('');
+  const counts = {'金':0,'木':0,'水':0,'火':0,'土':0};
+  for(const ch of wuxingAll){ if(counts.hasOwnProperty(ch)) counts[ch]++; }
+  document.getElementById('r-wuxing').innerHTML = Object.keys(counts).map(k=>
+    `<span class="wx-chip wx-${k}">${k} × ${counts[k]}</span>`
+  ).join('');
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

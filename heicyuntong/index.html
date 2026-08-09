@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曦銓堂 | 關帝靈籤</title>
+<style>
+  :root{
+    --bg:#1a0d0a; --bg2:#2b1410; --gold:#d4af37; --gold-soft:#e8c766;
+    --red:#8b1a1a; --red-deep:#5c0f0f; --cream:#f3e6cf; --ink:#2a1a12;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Noto Serif CJK TC","PMingLiU","Songti TC",serif;
+    background:radial-gradient(ellipse at top,#3a1c14 0%,var(--bg) 60%,#0d0605 100%);
+    color:var(--cream); min-height:100vh; line-height:1.8;
+  }
+  .container{max-width:760px;margin:0 auto;padding:0 20px;}
+  a{color:inherit;}
+
+  header.top{padding:26px 0 14px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.25);}
+  header.top .brand{font-size:1.7rem;letter-spacing:4px;color:var(--gold-soft);font-weight:600;}
+  header.top .brand small{display:block;font-size:0.8rem;letter-spacing:2px;color:#c9a876;margin-top:6px;font-weight:normal;}
+
+  /* progress hint bar */
+  .hintbar{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg,rgba(20,10,7,0.97),rgba(20,10,7,0.9));
+    border-bottom:1px solid rgba(212,175,55,0.3);
+    padding:10px 0; font-size:0.85rem; text-align:center; color:var(--gold-soft);
+    backdrop-filter:blur(4px);
+  }
+  .hintbar .steps{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;}
+  .hintbar .step{padding:3px 10px;border-radius:20px;background:rgba(212,175,55,0.08);color:#9a8265;}
+  .hintbar .step.active{background:rgba(212,175,55,0.25);color:var(--gold-soft);font-weight:600;}
+  .hintbar .msg{margin-top:6px;color:#e8d9b8;font-size:0.82rem;}
+
+  main{padding:36px 0 80px;}
+  .screen{display:none;animation:fadein .5s ease;}
+  .screen.show{display:block;}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  h1.page-title{font-size:1.5rem;color:var(--gold-soft);text-align:center;margin-bottom:6px;letter-spacing:1px;}
+  p.page-sub{text-align:center;color:#c9b18a;font-size:0.92rem;margin-bottom:30px;}
+
+  /* method cards */
+  .methods{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;}
+  .method-card{
+    background:linear-gradient(160deg,#3a1e15,#241109);
+    border:1px solid rgba(212,175,55,0.35); border-radius:14px;
+    padding:26px 16px; text-align:center; cursor:pointer;
+    transition:transform .25s,box-shadow .25s; position:relative;
+  }
+  .method-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(212,175,55,0.15);}
+  .method-card .icon{font-size:2.2rem;margin-bottom:10px;}
+  .method-card h3{color:var(--gold-soft);font-size:1.05rem;margin-bottom:6px;}
+  .method-card p{font-size:0.8rem;color:#b39a76;}
+  .method-card.disabled{cursor:not-allowed;opacity:0.5;filter:grayscale(0.4);}
+  .method-card .badge{
+    position:absolute;top:10px;right:10px;font-size:0.65rem;
+    background:rgba(212,175,55,0.15);color:var(--gold-soft);
+    padding:3px 8px;border-radius:10px;border:1px solid rgba(212,175,55,0.3);
+  }
+
+  .panel{
+    background:linear-gradient(160deg,#2c1611,#1c0d09);
+    border:1px solid rgba(212,175,55,0.25); border-radius:16px;
+    padding:28px 24px; margin-bottom:20px;
+  }
+  .panel h2{color:var(--gold-soft);font-size:1.15rem;margin-bottom:14px;text-align:center;}
+  .panel ul{padding-left:20px;color:#dcc9a3;font-size:0.92rem;}
+  .panel li{margin-bottom:8px;}
+  .panel .note{margin-top:16px;font-size:0.82rem;color:#a88c63;border-top:1px dashed rgba(212,175,55,0.25);padding-top:12px;}
+
+  .btn{
+    display:inline-block; background:linear-gradient(135deg,var(--gold),#a9791f);
+    color:#241109; font-weight:700; border:none; border-radius:30px;
+    padding:14px 40px; font-size:1rem; cursor:pointer; letter-spacing:1px;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(212,175,55,0.35);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--gold-soft);}
+  .center{text-align:center;}
+  .actions{display:flex;justify-content:center;gap:14px;margin-top:26px;flex-wrap:wrap;}
+
+  /* draw stage */
+  .qiantong{
+    width:150px;height:190px;margin:10px auto 22px;
+    background:linear-gradient(160deg,#6b3a1c,#3d1f0d);
+    border-radius:16px 16px 40px 40px; border:2px solid #9a6a2f;
+    display:flex; align-items:flex-end; justify-content:center; gap:4px;
+    padding:14px 0 10px; box-shadow:inset 0 8px 20px rgba(0,0,0,0.4), 0 6px 18px rgba(0,0,0,0.5);
+    position:relative; overflow:hidden;
+  }
+  .qiantong .stick{width:6px;height:120px;background:linear-gradient(180deg,#e8c766,#b98a2f);border-radius:2px;transform-origin:bottom center;}
+  .qiantong.shaking .stick{animation:shake .5s ease-in-out infinite;}
+  .qiantong .stick:nth-child(2){animation-delay:.05s;}
+  .qiantong .stick:nth-child(3){animation-delay:.1s;}
+  .qiantong .stick:nth-child(4){animation-delay:.15s;}
+  .qiantong .stick:nth-child(5){animation-delay:.2s;}
+  @keyframes shake{0%,100%{transform:rotate(0deg) translateX(0);}25%{transform:rotate(-4deg) translateX(-2px);}75%{transform:rotate(4deg) translateX(2px);}}
+
+  .stick-result{
+    text-align:center; margin:14px 0 6px;
+  }
+  .stick-result .num{font-size:2.4rem;color:var(--gold-soft);font-weight:700;}
+  .stick-result .tier{display:inline-block;margin-top:6px;padding:4px 16px;border-radius:20px;font-size:0.9rem;border:1px solid var(--gold);color:var(--gold-soft);}
+  .stick-result .story{margin-top:10px;color:#cbb18a;font-size:0.95rem;}
+
+  /* moon blocks */
+  .blocks-wrap{display:flex;justify-content:center;gap:26px;margin:24px 0;}
+  .block{
+    width:64px;height:64px;border-radius:50% 50% 48% 48% / 60% 60% 40% 40%;
+    display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+    transition:transform .6s;box-shadow:0 4px 12px rgba(0,0,0,0.5);
+  }
+  .block.flat{background:linear-gradient(160deg,#e8d9b8,#c9a876);color:#5c3d1a;}
+  .block.round{background:linear-gradient(160deg,#7a2020,#4a0f0f);color:#e8c766;}
+  .block.tossing{animation:toss .7s ease-in-out;}
+  @keyframes toss{0%{transform:translateY(0) rotate(0);}30%{transform:translateY(-40px) rotate(180deg);}60%{transform:translateY(-10px) rotate(340deg);}100%{transform:translateY(0) rotate(360deg);}}
+
+  .streak{display:flex;justify-content:center;gap:8px;margin:14px 0;}
+  .streak .dot{width:12px;height:12px;border-radius:50%;border:1px solid var(--gold);background:transparent;}
+  .streak .dot.filled{background:var(--gold);}
+
+  .outcome-msg{text-align:center;font-size:1.05rem;color:var(--gold-soft);margin:14px 0;min-height:1.6em;}
+  .outcome-sub{text-align:center;font-size:0.88rem;color:#c9b18a;margin-bottom:6px;}
+
+  /* result */
+  .result-poem{
+    text-align:center; font-size:1.15rem; color:var(--cream); line-height:2.1;
+    background:rgba(212,175,55,0.05); border:1px solid rgba(212,175,55,0.25);
+    border-radius:12px; padding:22px 10px; margin:18px 0;letter-spacing:1px;
+  }
+  .result-meta{text-align:center;margin-bottom:10px;}
+  .result-meta .num{color:var(--gold-soft);font-size:1.3rem;font-weight:700;}
+  .result-meta .tier{margin-left:8px;padding:3px 14px;border:1px solid var(--gold);border-radius:16px;font-size:0.85rem;color:var(--gold-soft);}
+  .result-story{text-align:center;color:#c9b18a;font-size:0.95rem;margin-bottom:6px;}
+  .result-explain{color:#dcc9a3;font-size:0.92rem;background:rgba(0,0,0,0.2);border-radius:10px;padding:16px 18px;margin:16px 0;}
+  .result-explain h4{color:var(--gold-soft);font-size:0.9rem;margin-bottom:8px;}
+  .cats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;}
+  .cat-item{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.18);border-radius:8px;padding:10px 12px;font-size:0.82rem;}
+  .cat-item b{color:var(--gold-soft);}
+
+  footer{text-align:center;padding:26px 0 40px;color:#8a7150;font-size:0.78rem;border-top:1px solid rgba(212,175,55,0.15);margin-top:20px;}
+  footer p{margin-bottom:4px;}
+
+  @media (max-width:520px){
+    .methods{grid-template-columns:1fr;}
+    .cats-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="container">
+    <div class="brand">曦 銓 堂<small>占卜問卦 · 誠心指引</small></div>
+  </div>
+</header>
+
+<div class="hintbar">
+  <div class="container">
+    <div class="steps" id="steps">
+      <span class="step" data-step="home">選擇方式</span>
+      <span class="step" data-step="intro">了解規矩</span>
+      <span class="step" data-step="draw">誠心抽籤</span>
+      <span class="step" data-step="block">擲聖杯確認</span>
+      <span class="step" data-step="result">查看籤文</span>
+    </div>
+    <div class="msg" id="hintmsg">請先揀一種占卜方式</div>
+  </div>
+</div>
+
+<main class="container">
+
+  <!-- HOME: method selection -->
+  <section class="screen show" id="screen-home">
+    <h1 class="page-title">請選擇占卜方式</h1>
+    <p class="page-sub">誠心則靈，先揀一種你想用嘅方式</p>
+    <div class="methods">
+      <div class="method-card" id="card-guandi">
+        <div class="icon">🎋</div>
+        <h3>關帝靈籤</h3>
+        <p>抽籤問事，擲聖杯確認</p>
+      </div>
+      <div class="method-card disabled">
+        <span class="badge">敬請期待</span>
+        <div class="icon">☯️</div>
+        <h3>六爻搖卦</h3>
+        <p>即將推出</p>
+      </div>
+      <div class="method-card disabled">
+        <span class="badge">敬請期待</span>
+        <div class="icon">🀫</div>
+        <h3>八字排盤</h3>
+        <p>即將推出</p>
+      </div>
+      <div class="method-card disabled">
+        <span class="badge">敬請期待</span>
+        <div class="icon">🕯️</div>
+        <h3>擇日</h3>
+        <p>即將推出</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="screen" id="screen-intro">
+    <h1 class="page-title">關帝靈籤 · 抽籤須知</h1>
+    <div class="panel">
+      <ul>
+        <li>請先喺心中默念你姓名（或代問者姓名），以及想請示嘅事情。</li>
+        <li>一次只問一件事，問題要清晰、具體（例如：呢份工岩唔岩轉？呢單生意可唔可以做？）。</li>
+        <li>心誠則靈，唔誠心或者三心兩意抽出嚟嘅籤未必準確。</li>
+        <li>抽到籤之後，要連續擲三次「聖杯」確認呢支籤先算數 —— 呢個係傳統關帝廟嘅規矩。</li>
+      </ul>
+      <div class="note">💡 提示：擲出「笑杯」代表你問嘅嘢仲未夠清楚，收拾心神再擲多次；擲出「陰杯」代表呢支唔係你嘅籤，要重新抽一次。</div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" onclick="goTo('home')">返回</button>
+      <button class="btn" onclick="goTo('draw')">明白，開始抽籤</button>
+    </div>
+  </section>
+
+  <!-- DRAW -->
+  <section class="screen" id="screen-draw">
+    <h1 class="page-title">誠心抽籤</h1>
+    <p class="page-sub" id="draw-sub">心中默念你想問嘅事，然後搖動籤筒</p>
+
+    <div class="qiantong" id="qiantong">
+      <div class="stick"></div><div class="stick"></div><div class="stick"></div><div class="stick"></div><div class="stick"></div>
+    </div>
+
+    <div id="draw-idle" class="center">
+      <button class="btn" id="btn-draw" onclick="drawStick()">🙏 誠心抽籤</button>
+    </div>
+
+    <div id="draw-result" class="stick-result" style="display:none;">
+      <div class="num" id="res-num"></div>
+      <div class="tier" id="res-tier"></div>
+      <div class="story" id="res-story"></div>
+      <div class="actions">
+        <button class="btn ghost" onclick="redraw()">重新抽籤</button>
+        <button class="btn" onclick="goTo('block')">擲聖杯確認</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOON BLOCKS -->
+  <section class="screen" id="screen-block">
+    <h1 class="page-title">擲聖杯確認</h1>
+    <p class="page-sub">需要連續擲出 <b>3次聖杯</b>，先確認呢支籤係屬於你嘅答案</p>
+
+    <div class="streak" id="streak">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+
+    <div class="blocks-wrap" id="blocks-wrap">
+      <div class="block flat" id="block1">◐</div>
+      <div class="block flat" id="block2">◐</div>
+    </div>
+
+    <div class="outcome-msg" id="outcome-msg">準備好就擲杯</div>
+    <div class="outcome-sub" id="outcome-sub"></div>
+
+    <div class="center">
+      <button class="btn" id="btn-toss" onclick="tossBlocks()">🪙 擲聖杯</button>
+    </div>
+
+    <div class="panel" style="margin-top:24px;">
+      <ul style="font-size:0.85rem;">
+        <li><b>聖杯</b>（一正一反）— 表示同意 / 準確，需連續三次</li>
+        <li><b>笑杯</b>（兩塊都平面向上）— 關帝笑住話你問得未夠清楚，再擲一次</li>
+        <li><b>陰杯</b>（兩塊都圓面向上）— 表示唔係，要返去重新抽籤</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="screen-result">
+    <h1 class="page-title">籤文結果</h1>
+    <div class="result-meta">
+      <span class="num" id="r-num"></span>
+      <span class="tier" id="r-tier"></span>
+    </div>
+    <div class="result-story" id="r-story"></div>
+    <div class="result-poem" id="r-poem"></div>
+
+    <div class="result-explain">
+      <h4>籤意解說</h4>
+      <div id="r-explain"></div>
+    </div>
+
+    <div class="cats-grid" id="r-cats"></div>
+
+    <div class="panel">
+      <p style="text-align:center;font-size:0.9rem;color:#dcc9a3;">
+        以上為傳統籤文之通用解說，僅供參考。若想針對你所問嘅事情作詳細解籤，
+        歡迎帶住呢支籤嘅結果嚟曦銓堂，由師傅為你詳細解說。
+      </p>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" onclick="goTo('home')">返回首頁</button>
+      <button class="btn" onclick="goTo('intro')">再問一事</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>曦銓堂 · 占卜問卦</p>
+  <p>籤文採用傳統「關聖帝君靈籤」（一百首）版本，僅供參考，重要決定請以個人判斷及專業意見為準。</p>
+</footer>
+
+<script src="guandi-data.js"></script>
+<script>
+let currentSign = null;
+let streakCount = 0;
+
+const HINTS = {
+  home:  '請先揀一種占卜方式',
+  intro: '請耐心睇清楚規矩，誠心至靈',
+  draw:  '心中默念你想問嘅事，然後撳「誠心抽籤」',
+  block: '擲聖杯確認呢支籤係唔係屬於你',
+  result:'呢支籤嘅完整內容同解說',
+};
+
+function goTo(step){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
+  document.getElementById('screen-'+step).classList.add('show');
+  document.querySelectorAll('.step').forEach(s=>s.classList.toggle('active', s.dataset.step===step));
+  document.getElementById('hintmsg').textContent = HINTS[step];
+  if(step==='draw'){ resetDrawUI(); }
+  if(step==='block'){ resetBlockUI(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('card-guandi').addEventListener('click', ()=>goTo('intro'));
+
+function resetDrawUI(){
+  document.getElementById('draw-idle').style.display='block';
+  document.getElementById('draw-result').style.display='none';
+  document.getElementById('qiantong').classList.remove('shaking');
+  document.getElementById('draw-sub').textContent = '心中默念你想問嘅事，然後搖動籤筒';
+}
+
+function redraw(){
+  currentSign = null;
+  streakCount = 0;
+  resetDrawUI();
+}
+
+function drawStick(){
+  const btn = document.getElementById('btn-draw');
+  btn.disabled = true;
+  const qt = document.getElementById('qiantong');
+  qt.classList.add('shaking');
+  document.getElementById('draw-sub').textContent = '搖籤中……';
+  setTimeout(()=>{
+    qt.classList.remove('shaking');
+    const idx = Math.floor(Math.random()*GUANDI_SIGNS.length);
+    currentSign = GUANDI_SIGNS[idx];
+    streakCount = 0;
+    document.getElementById('res-num').textContent = '第 ' + currentSign.num + ' 籤';
+    document.getElementById('res-tier').textContent = currentSign.tier;
+    document.getElementById('res-story').textContent = currentSign.story;
+    document.getElementById('draw-idle').style.display='none';
+    document.getElementById('draw-result').style.display='block';
+    btn.disabled = false;
+  }, 1200);
+}
+
+function resetBlockUI(){
+  updateStreakDots();
+  document.getElementById('outcome-msg').textContent = '準備好就擲杯';
+  document.getElementById('outcome-sub').textContent = '';
+  document.getElementById('block1').className='block flat';
+  document.getElementById('block1').textContent='◐';
+  document.getElementById('block2').className='block flat';
+  document.getElementById('block2').textContent='◐';
+  document.getElementById('btn-toss').disabled = false;
+}
+
+function updateStreakDots(){
+  const dots = document.querySelectorAll('#streak .dot');
+  dots.forEach((d,i)=> d.classList.toggle('filled', i < streakCount));
+}
+
+function tossBlocks(){
+  const btn = document.getElementById('btn-toss');
+  btn.disabled = true;
+  const b1 = document.getElementById('block1');
+  const b2 = document.getElementById('block2');
+  b1.classList.add('tossing');
+  b2.classList.add('tossing');
+  document.getElementById('outcome-msg').textContent = '擲杯中……';
+  document.getElementById('outcome-sub').textContent = '';
+
+  setTimeout(()=>{
+    b1.classList.remove('tossing');
+    b2.classList.remove('tossing');
+    const s1 = Math.random() < 0.5; // true = flat(平面) up
+    const s2 = Math.random() < 0.5;
+    renderBlock(b1, s1);
+    renderBlock(b2, s2);
+
+    if(s1 !== s2){
+      // 聖杯
+      streakCount++;
+      updateStreakDots();
+      if(streakCount >= 3){
+        document.getElementById('outcome-msg').textContent = '🙏 三次聖杯！呢支籤確認屬於你';
+        document.getElementById('outcome-sub').textContent = '正在為你揭開籤文……';
+        setTimeout(()=>showResult(), 1400);
+        return;
+      } else {
+        document.getElementById('outcome-msg').textContent = '聖杯！（' + streakCount + '/3）';
+        document.getElementById('outcome-sub').textContent = '仲要再連續擲中先算確認，繼續誠心擲杯';
+      }
+    } else if(s1 && s2){
+      // 笑杯：兩塊都平面向上
+      document.getElementById('outcome-msg').textContent = '😊 笑杯';
+      document.getElementById('outcome-sub').textContent = '關帝話你問嘅嘢仲未夠清楚，收拾心神，再擲一次（唔會扣走已有嘅聖杯次數）';
+    } else {
+      // 陰杯：兩塊都圓面向上
+      streakCount = 0;
+      updateStreakDots();
+      document.getElementById('outcome-msg').textContent = '😔 陰杯';
+      document.getElementById('outcome-sub').textContent = '睇嚟唔係呢支籤，請重新誠心抽籤';
+      setTimeout(()=>goTo('draw'), 1800);
+    }
+    btn.disabled = false;
+  }, 900);
+}
+
+function renderBlock(el, flatUp){
+  if(flatUp){ el.className='block flat'; el.textContent='◐'; }
+  else { el.className='block round'; el.textContent='◑'; }
+}
+
+function showResult(){
+  const s = currentSign;
+  document.getElementById('r-num').textContent = '第 ' + s.num + ' 籤';
+  document.getElementById('r-tier').textContent = s.tier;
+  document.getElementById('r-story').textContent = s.story;
+  document.getElementById('r-poem').innerHTML = s.poem.map(l=>'<div>'+l+'</div>').join('');
+  document.getElementById('r-explain').textContent = s.explain || s.omen;
+
+  const catsEl = document.getElementById('r-cats');
+  catsEl.innerHTML = '';
+  const cats = s.categories || {};
+  const keys = Object.keys(cats);
+  if(keys.length){
+    catsEl.innerHTML = keys.map(k=>`<div class="cat-item"><b>${k}：</b>${cats[k]}</div>`).join('');
+  } else if(s.omen){
+    catsEl.innerHTML = `<div class="cat-item" style="grid-column:1/-1;"><b>籤意：</b>${s.omen}</div>`;
+  }
+  goTo('result');
+}
+</script>
+</body>
+</html>
